@@ -1,0 +1,38 @@
+ISSCAAP_Group,SpeciesCat,seafood_type,convert_val
+"Cods, hakes, haddocks",32,fish,1.15
+"Herrings, sardines, anchovies",35,fish,1.15
+"Flounders, halibuts, soles",31,fish,1.15
+Miscellaneous coastal fishes,33,fish,1.15
+"King crabs, squat-lobsters",44,crustaceans,2.8
+Miscellaneous demersal fishes,34,fish,1.15
+"Crabs, sea-spiders",42,crustaceans,2.8
+"Lobsters, spiny-rock lobsters",43,crustaceans,2.8
+"Shrimps, prawns",45,crustaceans,2.8
+"Tunas, bonitos, billfishes",36,fish,1.15
+"Scallops, pectens",55,molluscs,6
+Miscellaneous pelagic fishes,37,fish,1.15
+"Sharks, rays, chimaeras",38,fish,1.15
+"Clams, cockles, arkshells",56,molluscs,6
+"Abalones, winkles, conchs",52,molluscs,6
+"Squids, cuttlefishes, octopuses",57,molluscs,6
+Shads,24,fish,1.15
+"Salmons, trouts, smelts",23,fish,1.15
+Miscellaneous aquatic invertebrates,77,misc_invt,4.6966674177467365
+Miscellaneous diadromous fishes,25,fish,1.15
+Mussels,54,molluscs,6
+Sea-urchins and other echinoderms,76,echinoderms,3.3166666666666664
+Oysters,53,molluscs,6
+"Carps, barbels and other cyprinids",11,fish,1.15
+Miscellaneous marine crustaceans,47,crustaceans,2.8
+"Sturgeons, paddlefishes",21,fish,1.15
+Miscellaneous marine molluscs,58,molluscs,6
+Marine fishes not identified,39,fish,1.15
+River eels,22,fish,1.15
+Miscellaneous freshwater fishes,13,fish,1.15
+Tilapias and other cichlids,12,fish,1.15
+Red seaweeds,92,plant,10
+Miscellaneous aquatic plants,94,plant,10
+Brown seaweeds,91,plant,10
+Green seaweeds,93,plant,10
+Freshwater crustaceans,41,crustaceans,2.8
+Freshwater molluscs,51,molluscs,6

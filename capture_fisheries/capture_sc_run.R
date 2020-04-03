@@ -1,0 +1,318 @@
+## Tracey Mangin
+## March 6, 2020
+## Compute supply curves
+
+## attach librariess
+library(tidyverse)
+library(purrr)
+library(furrr)
+
+## save path
+savepath <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/Figures/"
+
+## bp path
+bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/outputs/"
+
+## source functions
+functions <- list.files(here::here("capture_functions"))
+
+walk(functions, ~ here::here("capture_functions", .x) %>% source()) # load local functions
+
+## set pathstart
+pathstart <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/"
+
+## read in steady state file
+ss_outputs_scenarios <- read.csv("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/ss_outputs_scenarios.csv")
+
+## read in projection df
+projection_df <- readRDS("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/projection_outputs.rds")
+
+## upsides
+upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F)
+
+## conversions
+conv_vals <- read_csv("bp1_nature/processed_data/isscaap_food_conv_all.csv")
+
+## filter for starting year (2012)
+upsides0 <- upsides %>%
+  filter(Year == 2012) %>%
+  mutate(BMSY = Biomass / BvBmsy) 
+
+## stocks to remove
+filter_out <- upsides0 %>%
+  filter(MSY > BMSY)
+
+## get fao scale value
+fao_scale_df <- read_csv(paste0(bp_path, "upside_fao_scale_df.csv"))
+
+## scale capture fishery production
+cf_scale_val <- fao_scale_df %>%
+  select(rel_catch) %>%
+  as.numeric()
+
+## scale for reduction fisheries
+red_scale_mult <- 1 - 0.18
+
+## ------------------------------------------------------------------------------------
+## get production under different price values
+## -------------------------------------------------------------------------------------
+
+projection_df2 <- projection_df %>%
+  mutate(year = time + 2011) %>%
+  filter(year == 2050) %>%
+  select(id_orig, f_policy, harvest_2050 = harvest)
+
+
+## run production function (Fmsy or Fcurrent)
+## -------------------------------------------------------
+
+## remove stocks
+ss_outputs_scenarios2 <- ss_outputs_scenarios %>%
+  filter(!id_orig %in% filter_out$IdOrig)
+
+plan(multiprocess)
+
+price_vals <- as.list(seq(0, 20000, 1))
+# price_vals <- as.list(c(100, 1500))
+
+## main text scenario
+production_df <- future_map(price_vals,
+                            calc_production,
+                            input_df = ss_outputs_scenarios2 %>% filter(scenario == "original_inputs")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+saveRDS(production_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df.rds")
+
+## group by price
+production_df_smry <- production_df %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+         total_ss_h = sum(adj_harvest),
+         total_2050_h = sum(harvest_2050_adj),
+         total_2050_h_scl = sum(harvest_2050_adj_scl),
+         total_2050_h_red = sum(h_2050_scl_red),
+         total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(production_df_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_smry.rds")
+
+
+## sensitivity analysis 1: improved tech
+production_df_s1 <- future_map(price_vals,
+                            calc_production,
+                            input_df = ss_outputs_scenarios2 %>% filter(scenario == "improved_tech")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+saveRDS(production_df_s1, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s1.rds")
+
+## group by price
+production_s1_smry <- production_df_s1 %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+            total_ss_h = sum(adj_harvest),
+            total_2050_h = sum(harvest_2050_adj),
+            total_2050_h_scl = sum(harvest_2050_adj_scl),
+            total_2050_h_red = sum(h_2050_scl_red),
+            total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(production_s1_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s1_smry.rds")
+
+
+
+## sensitivity analysis 2: cs_price
+production_df_s2 <- future_map(price_vals,
+                               calc_production,
+                               input_df = ss_outputs_scenarios2 %>% filter(scenario == "cs_price")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+saveRDS(production_df_s2, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s2.rds")
+
+## group by price
+production_s2_smry <- production_df_s2 %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+            total_ss_h = sum(adj_harvest),
+            total_2050_h = sum(harvest_2050_adj),
+            total_2050_h_scl = sum(harvest_2050_adj_scl),
+            total_2050_h_red = sum(h_2050_scl_red),
+            total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(production_s2_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s2_smry.rds")
+
+
+
+
+## sensitivity analysis 3: improved tech and cs cost of management
+production_df_s3 <- future_map(price_vals,
+                               calc_production,
+                               input_df = ss_outputs_scenarios2 %>% filter(scenario == "improved_tech_cs")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+
+saveRDS(production_df_s3, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s3.rds")
+
+## group by price
+production_s3_smry <- production_df_s3 %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+            total_ss_h = sum(adj_harvest),
+            total_2050_h = sum(harvest_2050_adj),
+            total_2050_h_scl = sum(harvest_2050_adj_scl),
+            total_2050_h_red = sum(h_2050_scl_red),
+            total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(production_s3_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s3_smry.rds")
+
+
+
+# ## Adjust so that if the max is < 0, 0 produced.
+# production_df_adj <- production_df %>%
+#   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
+#          adj_profit = ifelse(adj_harvest == 0, 0, profit))
+# 
+# saveRDS(production_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/production_df_adj.rds")
+
+
+
+## repeat, but assume that you would always choose to manage with FMSY
+calc_fmsy_prod <- function(price_val, input_df) {
+  
+  fmsy_df <- input_df %>%
+    mutate(price = price_val,
+           extract_cost = calc_extract_cost(g = g, f = FvFmsy, c = c, beta = beta),
+           profit = (ss_h * price_val) - (mcost_mt * ss_h) - extract_cost,
+           adj_harvest = ifelse(profit < 0, 0, ss_h),
+           adj_profit = ifelse(adj_harvest == 0, 0, profit))
+
+}
+
+fmsy_prod_df <- map(price_vals,
+                    calc_fmsy_prod,
+                    input_df = ss_outputs_scenarios2 %>% filter(f_policy == "FMSY",
+                                                               scenario == "original_inputs")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+saveRDS(fmsy_prod_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/fmsy_prod_df.rds")
+
+## group by price
+fmsy_prod_smry <- fmsy_prod_df %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+            total_ss_h = sum(adj_harvest),
+            total_2050_h = sum(harvest_2050_adj),
+            total_2050_h_scl = sum(harvest_2050_adj_scl),
+            total_2050_h_red = sum(h_2050_scl_red),
+            total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(fmsy_prod_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/fmsy_prod_smry.rds")
+
+
+
+ 
+# # ## Adjust so that if the max is < 0, 0 produced.
+# # fmsy_prod_df_adj <- fmsy_prod_df %>%
+# #   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
+# #          adj_profit = ifelse(adj_harvest == 0, 0, profit))
+# # 
+# # saveRDS(fmsy_prod_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/fmsy_prod_df_adj.rds")
+# 
+# 
+# ## repeat, f0 only, max price == 5000
+# price_vals2 <- as.list(seq(0, 5000, 1))
+# 
+# 
+calc_f0_prod <- function(price_val, input_df) {
+
+  f0_df <- input_df %>%
+    mutate(price = price_val,
+           extract_cost = calc_extract_cost(g = g, f = FvFmsy, c = c, beta = beta),
+           profit = (ss_h * price_val) - (mcost_mt * ss_h) - extract_cost,
+           adj_harvest = ifelse(profit < 0, 0, ss_h),
+           adj_profit = ifelse(adj_harvest == 0, 0, profit))
+
+}
+
+f0_prod_df <- map(price_vals,
+                  calc_f0_prod,
+                  input_df = ss_outputs_scenarios2 %>% filter(f_policy == "F_current",  scenario == "original_inputs")) %>%
+  bind_rows() %>%
+  left_join(projection_df2) %>%
+  mutate(harvest_2050_adj = ifelse(adj_harvest == 0, 0, harvest_2050),
+         harvest_2050_adj_scl = harvest_2050_adj / cf_scale_val,
+         h_2050_scl_red = harvest_2050_adj_scl * red_scale_mult,
+         SpeciesCat = upsides0$SpeciesCat[match(id_orig, upsides0$IdOrig)]) %>%
+  left_join(conv_vals) %>%
+  mutate(food_2050 = h_2050_scl_red * convert_mult)
+
+saveRDS(f0_prod_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/f0_prod_df.rds")
+
+
+## group by price
+f0_prod_smry <- f0_prod_df %>%
+  group_by(scenario, price, seafood_type, convert_val) %>%
+  summarise(total_profit = sum(adj_profit),
+            total_ss_h = sum(adj_harvest),
+            total_2050_h = sum(harvest_2050_adj),
+            total_2050_h_scl = sum(harvest_2050_adj_scl),
+            total_2050_h_red = sum(h_2050_scl_red),
+            total_2050_food = sum(food_2050)) %>%
+  ungroup()
+
+saveRDS(f0_prod_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/f0_prod_smry.rds")
+
+
+
+
+# 
+# 
+# 
+# 
+# # ## Adjust so that if the max is < 0, 0 produced.
+# # f0_prod_df_adj <- f0_prod_df %>%
+# #   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
+# #          adj_profit = ifelse(adj_harvest == 0, 0, profit))
+# # 
+# # saveRDS(f0_prod_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/f0_prod_df_adj.rds")
+# 
+# 
+# 
+# 
