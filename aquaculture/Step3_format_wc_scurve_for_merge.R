@@ -23,7 +23,7 @@ data_orig <- read.csv(file.path(datadir, "harvest_x_price_x_conversion.csv"), as
 
 # Conversion factors
 conv_factors <- data_orig %>% 
-  select(seafood_type, convert_val) %>% 
+  dplyr::select(seafood_type, convert_val) %>% 
   unique() %>% 
   mutate(conversion_prop=1/convert_val)
 

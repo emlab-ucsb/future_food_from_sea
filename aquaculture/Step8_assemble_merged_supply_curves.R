@@ -16,6 +16,10 @@ library(gridExtra)
 datadir <- "aquaculture/aquaculture_v3/output"
 plotdir <- "aquaculture/aquaculture_v3/figures"
 
+# Correct WC total production (should be total reduced by 18%)
+wc <- read.csv(file.path(datadir, "wc_feed_availability_scen2-4.csv")) %>% 
+  select(scenario, price, wc_mt_yr) %>% 
+  mutate(wc_dhc_yr=wc_mt_yr *0.82)
 
 
 # Loop through feed price scenarios
@@ -32,10 +36,15 @@ data <- purrr::map_df(outfiles_to_merge, function(x) {
   
 })
 
-# Remove Scenario 2
+# Format data
 data1 <- data %>% 
-  filter(aq_scen != "Scenario 2 - byproducts only")
-  
+  # Remove Scenario 2
+  filter(aq_scen != "Scenario 2 - byproducts only") %>% 
+  # Add corrected WC data
+  left_join(wc, by=c("cap_scen"="scenario", "price"="price")) %>% 
+  mutate(mt_yr=ifelse(sector=="Capture fisheries", wc_dhc_yr, mt_yr)) %>% 
+  # Remove unnecessary columns
+  select(-c(wc_mt_yr, wc_dhc_yr))
 
 # Export data
 saveRDS(data1, file.path(datadir, "WC_AQ_supply_curve_merged_all_scenarios.Rds"))
