@@ -159,8 +159,7 @@ sscheck_filt <- sscheck %>%
 sscheck2 <- sscheck %>%
   filter(!id_orig %in% filt_msy_bmsy_df$id_orig)
 
-## checked the outputs in the other files (fmsy_test and fcurrent_test)
-
+## fisheries reach steady state when projected out over longer time horizon. 
 
 ## update scaling number
 upsides0_filt <- upsides0 %>%
