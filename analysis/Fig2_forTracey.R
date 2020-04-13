@@ -1,13 +1,9 @@
-# rm(list = ls(all = TRUE)) 
-# #dev.off()
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
+## Future food from the sea
+## main text figure 2
+## conceptual curves
 
 library(tidyverse)
 library(ggrepel)
-# library(ggplot2)   # Data visualization
-# library(tidyr)   # Tidy data management
-# library(dplyr)
 
 
 N = 10000
@@ -18,7 +14,7 @@ DF1 = data.frame(PwOA=seq(.88,4.5,length.out=N)) %>%
   mutate(QwOA = 10/PwOA - 8/PwOA^2) %>%
   mutate(PwM = -.3/(QwM-3.5) +.6 ) %>%
   mutate(QwMSY = 3.5) %>%
-  select(QwOA,PwOA,QwM,PwM,QwMSY,PwMSY)
+  dplyr::select(QwOA,PwOA,QwM,PwM,QwMSY,PwMSY)
 
 DF2 = data.frame(Pm1=seq(.88,4.5,length.out=N)) %>%
   mutate(Pm2=seq(.9,4.5,length.out=N)) %>%
@@ -29,12 +25,12 @@ DF2 = data.frame(Pm1=seq(.88,4.5,length.out=N)) %>%
   mutate(Qm4 = .7*(tmp-1)+tmp) %>%
   mutate(Qm3 = .1*(tmp-1)+tmp) %>%
   mutate(Pm4 =  -.3/(tmp-3.5) +.7 ) %>%
-  select(Qm1,Pm1,Qm2,Pm2,Qm3,Pm3,Qm4,Pm4)
+  dplyr::select(Qm1,Pm1,Qm2,Pm2,Qm3,Pm3,Qm4,Pm4)
 
-DF_Tracey = bind_cols(DF1,DF2) #This is the dataframe you need
+DF_concept = bind_cols(DF1,DF2) #This is the dataframe you need
 
 
-P2a = ggplot(data=DF_Tracey) +
+P2a = ggplot(data=DF_concept) +
   geom_path(aes(x=QwOA,y=PwOA),size=2) +
   geom_path(aes(x=QwM,y=PwM),size=2,color="blue") +
   geom_line(aes(x=QwMSY,y=PwMSY),size=2,color="green") +
@@ -46,7 +42,7 @@ P2a = ggplot(data=DF_Tracey) +
   ylab("P")
 P2a
 
-P2b = ggplot(data=DF_Tracey) +
+P2b = ggplot(data=DF_concept) +
   geom_path(aes(x=Qm1,y=Pm1),size=2) +
   geom_line(aes(x=Qm2,y=Pm2),size=2,color="green") +
   geom_path(aes(x=Qm3,y=Pm3),size=2,color="blue") +
@@ -59,45 +55,44 @@ P2b = ggplot(data=DF_Tracey) +
   ylab("P")
 P2b
 
-# ggsave("P2a.png",P2a)
-# ggsave("P2b.png",P2b)
+
 
 ## organize the data
 ## -------------------------------
 
-wild1 <- DF_Tracey %>%
-  select(quantity = QwOA, price = PwOA) %>%
+wild1 <- DF_concept %>%
+  dplyr::select(quantity = QwOA, price = PwOA) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwOA")
 
-wild2 <- DF_Tracey %>%
-  select(quantity = QwM, price = PwM) %>%
+wild2 <- DF_concept %>%
+  dplyr::select(quantity = QwM, price = PwM) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwM")
 
-wild3 <- DF_Tracey %>%
-  select(quantity = QwMSY, price = PwMSY) %>%
+wild3 <- DF_concept %>%
+  dplyr::select(quantity = QwMSY, price = PwMSY) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwMSY")
 
-m1 <- DF_Tracey %>%
-  select(quantity = Qm1, price = Pm1) %>%
+m1 <- DF_concept %>%
+  dplyr::select(quantity = Qm1, price = Pm1) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm1")
 
-m2 <- DF_Tracey %>%
-  select(quantity = Qm2, price = Pm2) %>%
+m2 <- DF_concept %>%
+  dplyr::select(quantity = Qm2, price = Pm2) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm2")
 
-m3 <- DF_Tracey %>%
-  select(quantity = Qm3, price = Pm3) %>%
+m3 <- DF_concept %>%
+  dplyr::select(quantity = Qm3, price = Pm3) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm3")
 
 
-m4 <- DF_Tracey %>%
-  select(quantity = Qm4, price = Pm4) %>%
+m4 <- DF_concept %>%
+  dplyr::select(quantity = Qm4, price = Pm4) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm4")
 
@@ -121,7 +116,7 @@ wild_labs <- fig2_wild %>%
 wild_labs2 <- data.frame(lab = c('OA', 'R', 'MSY'))
                                  
 wild_labs3 <- cbind(wild_labs, wild_labs2) %>%
-  select(-management)
+  dplyr::select(-management)
 
 
 mar_labs <- fig2_mar %>%
@@ -132,7 +127,7 @@ mar_labs <- fig2_mar %>%
 mar_labs2 <- data.frame(lab = c('M1', 'M2', 'M3', 'M4'))
 
 mar_labs3 <- cbind(mar_labs, mar_labs2) %>%
-  select(-scenario)
+  dplyr::select(-scenario)
 
 all_labs <- rbind(mar_labs3, wild_labs3)
 
@@ -169,9 +164,9 @@ conceptual_fig <- ggplot(data = fig2_mar, aes(x = quantity, y = price, group = s
         # legend.text = element_text(size = 15),
         strip.text = element_text(size = 20))
 
-## save path for figures
-savepath <- "~/Box/SFG Centralized Resources/Projects/Blue paper/nature adaptation/results/figures/"
-ggsave(filename =  paste0(savepath, "fig2_conceptual.png"), conceptual_fig, width = 14, height = 8, units = "in", dpi = 300)
+## figure 2 in main text
+## note to user: update path and save
+ggsave(filename =  "fig2_conceptual.png", conceptual_fig, width = 14, height = 8, units = "in", dpi = 300)
 
 
 
