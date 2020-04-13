@@ -1,7 +1,9 @@
 ## Tracey Mangin
 ## April 9, 2019
-## Ocean Protein Supply
-## Run file
+## Future of Food From the Sea
+
+## Run file -- this script runs the bioeconomic fishery model and produces fishery-level
+## results used in the analysis.
 
 ## attach librariess
 library(tidyverse)
@@ -10,9 +12,6 @@ library(purrr)
 library(scales)
 library(plotly)
 library(furrr)
-
-## save path
-savepath <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/public-repo/"
 
 ## source functions
 functions <- list.files(here::here("capture_functions"))
@@ -27,14 +26,13 @@ delta  <- 1 / ( 1 + dd) # discount factor
 tol <- 1
 interval <- 3
 
-## set pathstart
-pathstart <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/"
 
-## prep upsides data
+## prep fisheries data
 ## ----------------------------------------------------------------------
 
 ## load the upsides data
-upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F)
+## note to user -- update the following line of code to load ProjectionData.csv
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F)
 
 ## filter for starting year (2012)
 upsides0 <- upsides %>%
@@ -56,8 +54,9 @@ input_df_adj <- input_df %>%
 ## ----------------------------------------------------------------------_
 
 ## load the management cost data
-mcostr <- read_csv("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Data/capture_fisheries/mgmt_cost/Outputs_rec_method_2018.csv")
-mcostm <- read_csv("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Data/capture_fisheries/mgmt_cost/Outputs_mean_method_2018.csv")
+## note to user -- update path to load files in mgmt_cost folder
+mcostr <- read_csv("~/ffts/m_capture_data/mgmt_cost/Outputs_rec_method_2018.csv")
+mcostm <- read_csv("~/ffts/m_capture_data/mgmt_cost/Outputs_mean_method_2018.csv")
 
 ## select relevant columns (also, never make a dataframe like these again)
 mcost_rec <- mcostr %>%
@@ -101,7 +100,8 @@ ss_b_df <- rbind(ss_b_df0, ss_b_df_fmsy) %>%
   mutate(ss_b = calc_ss_b(phi_val = phi, fval = FvFmsy),
          ss_h = calc_h(f = FvFmsy, b = ss_b, MSY = msy))
 
-write_csv(ss_b_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/steadys_b_h.csv")
+## note to user -- update path and save output. This will be used later.
+write_csv(ss_b_df, "~/steadys_b_h.csv")
 
 ## run the projection under FMSY and F current
 ## ----------------------------------------------------------------------
@@ -117,10 +117,8 @@ outputs <- cross(list(f_policy = policy_vec,
       delta = delta) %>%
   bind_rows()
 
-saveRDS(outputs, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/projection_outputs.rds")
-
-## save the new version as of march 2020 separately for now
-# saveRDS(outputs, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/projection_outputs2.rds")
+## note to user -- update path and save output. This will be used later.
+saveRDS(outputs, "~/projection_outputs.rds")
 
 
 ## using the projections, find when each stock reaches steady-state under each policy
@@ -136,7 +134,8 @@ steadystate_df <- cross(list(f_policy = policy_vec,
       int_val = interval) %>%
   bind_rows()
 
-saveRDS(steadystate_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/steadystate_df.rds")
+## note to user -- update path and save output. This will be used later.
+saveRDS(steadystate_df, "~/steadystate_df.rds")
 
 ## check steady state outputs... make sure they are breaking in appropriate spots
 sscheck <- steadystate_df %>%
@@ -150,7 +149,7 @@ filt_msy_bmsy_df <-input_df_adj %>%
   filter(msy > BMSY)
 
 ## There are 11 stocks that have MSY > BMSY. 
-## Remove for now. 4 percent of MSY
+## Remove. 4 percent of MSY
 sum(filt_msy_bmsy_df$msy) / sum(upsides0$MSY)
 
 sscheck_filt <- sscheck %>%
@@ -237,7 +236,9 @@ ss_outputs_scenarios <- supply_scenarios_df2 %>%
          price = input_df$price[match(id_orig, input_df$id_orig)],
          beta = beta)
 
-write_csv(ss_outputs_scenarios, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/ss_outputs_scenarios.csv")
+
+## note to users -- update the save path. these outputs will be used later.
+write_csv(ss_outputs_scenarios, "~/ss_outputs_scenarios.csv")
 
 # ## Add management costs
 # outputs2 <- outputs %>%
