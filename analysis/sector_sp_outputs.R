@@ -2,25 +2,26 @@
 ## December 10, 2019
 ## sector specific outcomes
 
+## future food from the sea
+## note to user: must run scripts in init_cond, capture_fisheries, and aquaculture folder first (outputs needed).
+## this creates figure 4 in the main text and other relevant outputs.
+
 library(tidyverse)
 library(scales)
 library(reconPlots)
 
 
-# ## save path for figures
-# savepath <- "~/Box/SFG Centralized Resources/Projects/Blue paper/nature adaptation/results/figures/"
-
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
-
 ## supply curves for main text
-data <- read_rds(paste0(bp_path, "outputs/subset_supply_curves.rds"))
+## note to user: change path, load file created in all_supply_curves.R
+data <- read_rds("subset_supply_curves.rds")
 
 ## initial production and price
-init_pq_df <- read_csv(paste0(bp_path, "outputs/init_pq_df.csv"))
+## note to user: change path, load file created in init_conditions.R
+init_pq_df <- read_csv("init_pq_df.csv")
 
 ## demand
-demand_df <- read_rds(paste0(bp_path,  "outputs/demand_curves_final.rds"))
+## note to user: change path, load file created in demand_curves.R
+demand_df <- read_rds("demand_curves_final.rds")
 
 ## nature paper scenarios
 np_scen_vec <- c("Scenario 3 - byproducts + directed", "Scenario 4a - tech advance", "Scenario 4c - tech advance")
@@ -216,6 +217,7 @@ fingers_crossed3 <- ggplot(indiv_supply2 %>% filter(aq_scen == "Scenario 4c - te
         legend.box = "vertical",
         plot.margin = margin(10, 30, 10, 10))
 
-ggsave(filename = paste0(bp_path, "/figures/fig4.png"), fingers_crossed3, width = 10, height = 5, units = "in", dpi = 300)
+## note to user: change path, save fig 4 in main text
+ggsave(filename = "fig4.png", fingers_crossed3, width = 10, height = 5, units = "in", dpi = 300)
 
 
