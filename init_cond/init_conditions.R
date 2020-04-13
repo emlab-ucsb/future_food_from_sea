@@ -2,20 +2,19 @@
 ## December 19, 2019
 ## initial conditions
 
+## This is STEP 3 in the init_cond folder.
+## Run edible_conv.R first to create required file.
+
 library(tidyverse)
 library(janitor)
 
-## bp 
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/"
 
-# ## current supply curve
-# mari_prod <- read_csv("~/GitHub/blue_paper_1/processed_data/current_mari_prod.csv")
-
-## upsides
-upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F)
+## note to user: update the path and load ProjectionData.csv
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F) 
 
 ## conversion factors
-conv_vals <- read_csv("bp1_nature/processed_data/isscaap_food_conv_all.csv")
+## note: this file is created in edible_conv.R
+conv_vals <- read_csv("isscaap_food_conv_all.csv")
 
 ## fao historical production
 hist_prod <- read_csv(paste0(bp_path, "project-materials/nature-revision/outputs/historical_prod.csv"))

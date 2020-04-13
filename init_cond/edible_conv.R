@@ -3,6 +3,8 @@
 ## Future food from the sea
 ## Create converions: Landed weight to food weight df
 
+## This is STEP 1 in the init_cond folder.
+
 
 ## libraries
 library(tidyverse)
@@ -10,7 +12,7 @@ library(tidyverse)
 ## read in relevant outputs/processed data
 
 ## note to user: update the path and load ProjectionData.csv
-upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F)
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F) %>%
   filter(Year == 2012)
 
 ## note to user: update the path and load FAO data from init_cond_data/GlobalProduction_2019.1.0 folder
