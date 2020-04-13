@@ -1,3 +1,11 @@
+
+
+## future food from the sea
+## note to user: must run scripts in init_cond, capture_fisheries, and aquaculture folder first (outputs needed).
+## this creates information needed for SI
+
+
+
 ## -----------------------------------
 ## find intersecting points
 ## ------------------------------------
@@ -5,17 +13,15 @@
 library(tidyverse)
 library(reconPlots)
 library(tictoc)
-# library(furrr)
 
-
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
 
 ## supply curves
-data <- read_rds(paste0(bp_path, "outputs/all_supply_curves.rds"))
+## note to user: change path, read in file created in all_supply_curves.R
+data <- read_rds("all_supply_curves.rds")
 
 ## demand
-demand_df <- read_rds(paste0(bp_path,  "outputs/demand_curves_final.rds"))
+## note to user: change path, read in file created in demand_curves
+demand_df <- read_rds("demand_curves_final.rds")
 
 ## create a dataframe for matching later
 id_df <- data %>%
@@ -23,7 +29,8 @@ id_df <- data %>%
   select(scenario2, scenario, inl_scen:aq_cost_scalar) %>%
   unique()
 
-saveRDS(id_df, paste0(bp_path, "outputs/ss_analysis/id_df.rds"))
+## change path, save ids
+saveRDS(id_df, "id_df.rds")
 
 
 ## -----------------------------------
@@ -109,7 +116,8 @@ bivalve_prod_vals <- cross(list(dval = demand_vec,
          ddf = bivalve_demand) %>%
   bind_rows()
 
-saveRDS(bivalve_prod_vals, paste0(bp_path, "outputs/ss_analysis/bivalve_intersects.rds"))
+## note to user: change path, save outputs
+saveRDS(bivalve_prod_vals, "bivalve_intersects.rds")
 toc()
 
 ## finfish intersection points
@@ -125,7 +133,8 @@ ff_prod_vals <- cross(list(dval = demand_vec,
          ddf = ff_demand) %>%
   bind_rows()
 
-saveRDS(ff_prod_vals, paste0(bp_path, "outputs/ss_analysis/ff_intersects.rds"))
+## note to user: change path, save outputs
+saveRDS(ff_prod_vals, "ff_intersects.rds")
 toc()
 
 ## inland intersection points
@@ -141,7 +150,8 @@ inland_prod_vals <- cross(list(dval = demand_vec,
          ddf = inland_demand) %>%
   bind_rows()
 
-saveRDS(inland_prod_vals, paste0(bp_path, "outputs/ss_analysis/inland_intersects.rds"))
+## note to user: change path, save outputs
+saveRDS(inland_prod_vals, "inland_intersects.rds")
 toc()
 
 
@@ -157,7 +167,8 @@ capture_prod_vals <- cross(list(dval = demand_vec,
          sdf = capture_supply, 
          ddf = capture_demand) 
 
-saveRDS(capture_prod_vals, paste0(bp_path, "outputs/ss_analysis/capture_intersects.rds"))
+## note to user: change path, save outputs
+saveRDS(capture_prod_vals, "capture_intersects.rds")
 toc()
 
 
@@ -179,145 +190,7 @@ ps_prod_vals <- cross(list(dval = demand_vec,
          sdf = ps_supply, 
          ddf = ps_demand) 
 
-saveRDS(ps_prod_vals, paste0(bp_path, "outputs/ss_analysis/ps_all_intersects.rds"))
+## note to user: change path, save outputs
+saveRDS(ps_prod_vals, "ps_all_intersects.rds")
 toc()
 
-# ### now find sector specific outputs
-# ## this will be a function
-# 
-# intersect_df <- indiv_prod_vals %>%
-#   select(scen_lab = scenario, demand_scen, price, total_meat_yr = meat_yr) %>%
-#   mutate(price = round(price),
-#          total_meat_yr = total_meat_yr / 1e6)
-# 
-# supply_df <- data %>%
-#   mutate(sector = str_replace(sector, "aquaculture", "mariculture"),
-#          sector = ifelse(sector == "Capture fisheries", "Marine wild fisheries",
-#                          ifelse(sector == "Inland", "Inland fisheries", sector)),
-#          scen_lab = ifelse(aq_scen == "Scenario 3 - byproducts + directed", "Policy reforms",
-#                            ifelse(aq_scen == "Scenario 4a - tech advance", "Tech innovation",
-#                                   ifelse(aq_scen == "Scenario 4c - tech advance", "Tech innovation (Ambitious)", aq_scen))))
-# 
-# 
-# zeros_df <- expand_grid(scenario2 = unique(supply_df$scenario2),
-#                         price = seq(0, 19999, 1))
-# 
-# supply_all_p_df <- supply_df %>%
-#   select(scenario2:sector) %>%
-#   unique() %>%
-#   left_join(zeros_df) %>%
-#   left_join(supply_df) %>%
-#   mutate(meat_yr = ifelse(is.na(meat_yr), 0, meat_yr)) %>%
-#   mutate(sector = str_replace(sector, "aquaculture", "mariculture"),
-#          sector = ifelse(sector == "Capture fisheries", "Marine wild fisheries",
-#                          ifelse(sector == "Inland", "Inland fisheries", sector)),
-#          scen_lab = ifelse(aq_scen == "Scenario 3 - byproducts + directed", "Policy reforms",
-#                            ifelse(aq_scen == "Scenario 4a - tech advance", "Tech innovation",
-#                                   ifelse(aq_scen == "Scenario 4c - tech advance", "Tech innovation (Ambitious)", aq_scen))))
-# 
-# 
-# 
-# sector_sup_df <- supply_all_p_df %>%
-#   left_join(intersect_df) %>%
-#   filter(!is.na(total_meat_yr)) %>%
-#   select(scenario2:aq_scen, scen_lab, aq_cost_scalar, sector, demand_scen, price, sector_meat_yr = meat_yr, total_meat_yr) %>%
-#   mutate(sector_meat_yr = sector_meat_yr / 1e6)
-# 
-# ## table for si
-# 
-# si_sub_table <- sector_sup_df %>%
-#   select(sector:sector_meat_yr) %>%
-#   pivot_wider(names_from = sector, values_from = sector_meat_yr) 
-# 
-# 
-# 
-# 
-# 
-# 
-
-# data2 <- data %>% 
-#   mutate(scenario_title=plyr::revalue(scenario, c("Scenario 1"="Scenario 1:\nFeed from by-products only",
-#                                                   "Scenario 2"="Scenario 2:\nFeed from by-products + whole fish",
-#                                                   "Scenario 3a"="Scenario 3a:\nFeed from by-products + whole fish\n(+50% reduction in FM/FO demand)",
-#                                                   "Scenario 3b"="Scenario 3b:\nFeed from by-products + whole fish\n(+75% reduction in FM/FO demand)",
-#                                                   "Scenario 3c"="Scenario 3c:\nFeed from by-products + whole fish\n(+95% reduction in FM/FO demand)",
-#                                                   "Scenario 4"="Scenario 4:\nFeed unconstrained\nby capture fisheries")))
-# 
-# ## nature paper figure 4 scenario
-# np_scen_vec <- c("Scenario 3c")
-# 
-# ## get scenarios that we are interested in
-# data_np <- data2 %>%
-#   filter(scenario %in% np_scen_vec) %>%
-#   mutate(sector = str_replace(sector, "aquaculture", "mariculture")) %>%
-#   mutate(scen_lab = ifelse(scenario == "Scenario 2", "Policy reforms",
-#                            ifelse(scenario == "Scenario 3a", "Tech innovation",
-#                                   ifelse(scenario == "Scenario 3c", "Tech innovation (Ambitious)", "Scenario D")))) %>%
-#   filter(sector != "Aggregate",
-#          inl_scen == "constant_cap")
-# 
-# ## individual supply and demand
-# ## --------------------------------------------------
-# 
-# indiv_supply <- data_np %>%
-#   mutate(sector = ifelse(sector == "Capture fisheries", "Marine wild fisheries",
-#                          ifelse(sector == "Inland", "Inland fisheries", sector)))
-# 
-# indiv_demand <- demand_df %>%
-#   filter(sector %in% c("marine_capture", "inland_production", "finfish_mari_a", "bivalve_mariculture")) %>%
-#   mutate(sector = ifelse(sector == "marine_capture", "Marine wild fisheries",
-#                          ifelse(sector == "inland_production", "Inland fisheries",
-#                                 ifelse(sector == "finfish_mari_a", "Finfish mariculture", "Bivalve mariculture"))))
-# 
-# find_sd_point_indiv <- function(scen, sdf, ddf) {
-#   
-#   ## define the price and sector curve
-#   demand <- scen$dval
-#   supply_scen <- scen$sscen
-#   prod_sector <- scen$sector_val
-#   
-#   ## supply df
-#   scdf <- sdf %>%
-#     filter(scenario == supply_scen,
-#            sector == prod_sector) %>%
-#     mutate(x = meat_yr,
-#            y = price)
-#   
-#   ## demand df
-#   dcdf <- ddf %>%
-#     filter(sector == prod_sector,
-#            demand_scen == demand) %>%
-#     mutate(x = quantity,
-#            y = price)
-#   
-#   intersect <- try({curve_intersect(scdf, dcdf, empirical = TRUE, domain = NULL)})
-#   if (inherits(intersect, "try-error")){
-#     intersect <- list(y = 0, x = 0)
-#   } else {
-#     intersect <- curve_intersect(scdf, dcdf, empirical = TRUE, domain = NULL)
-#   }
-#   
-#   
-#   output <- tibble(scenario = supply_scen,
-#                    sector = prod_sector,
-#                    demand_scen = demand,
-#                    price = intersect$y,
-#                    meat_yr = intersect$x)
-#   
-# }
-# 
-# ## make df of all intersection points
-# demand_vec <- as.list(unique(indiv_demand$demand_scen))
-# # demand_vec <- as.list(c("extreme"))
-# supply_vec <- as.list(unique(indiv_supply$scenario))
-# # supply_vec <- as.list(c("Scenario 2"))
-# sector_names <- as.list(unique(indiv_supply$sector))
-# # sector_names <- as.list(c("Capture fisheries"))
-# 
-# indiv_prod_vals <- cross(list(dval = demand_vec,
-#                               sscen = supply_vec,
-#                               sector_val = sector_names)) %>%
-#   map(find_sd_point_indiv,
-#       sdf = indiv_supply, 
-#       ddf = indiv_demand) %>%
-#   bind_rows()
