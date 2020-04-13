@@ -3,7 +3,7 @@
 ## initial conditions
 
 ## This is STEP 3 in the init_cond folder.
-## Run edible_conv.R first to create required file.
+## Run edible_conv.R and historic_prod.R first to create required files.
 
 library(tidyverse)
 library(janitor)
@@ -29,10 +29,13 @@ hist_prod_sp <- read_csv(paste0(bp_path, "project-materials/nature-revision/outp
 red_scale_mult <- 1 - 0.18
 
 ## meat production
-meat_prod <- read_csv(paste0(bp_path, "data/FAOSTAT_data_3-10-2020.csv"))
+## note: change path and load FAO data from init_cond_data folder
+meat_prod <- read_csv("FAOSTAT_data_3-10-2020.csv")
 
 ## init mari prod
-init_mari_prod <- read_csv(paste0(bp_path, "project-materials/nature-revision/outputs/init_mari_prod.csv"))
+## note to user: this is created in STEP 2 of init_cond (historic_prod.R)
+## run historic_prod.R first, save file, update path, read here.
+init_mari_prod <- read_csv("init_mari_prod.csv")
 
 ## upsides 2012 production (harvest and food)
 upsides_conv <- upsides %>%
@@ -87,7 +90,8 @@ prod_df <- cbind(upsides_prod, fao_prod) %>%
   mutate(rel_catch = total_catch_up / total_catch_fao, 
          rel_food = total_food_up / total_food_fao)
 
-write_csv(prod_df, paste0(bp_path, "upside_fao_scale_df.csv"))
+## update path, save file. this will be used later.
+write_csv(prod_df, "upside_fao_scale_df.csv")
 
 ## scale capture fishery production
 cf_scale_val <- prod_df %>%
@@ -322,7 +326,8 @@ ag_init_pq <- tibble(sector = c("aggregate_lb", "aggregate_marine"),
 
 init_pq_df2 <- rbind(init_pq_df, ag_init_pq)
 
-write_csv(init_pq_df2, paste0(bp_path, "project-materials/nature-revision/outputs/init_pq_df.csv"))
+## update path, save file. this will be used later in analysis.
+write_csv(init_pq_df2, "init_pq_df.csv")
 
 
 ### for si
@@ -333,7 +338,8 @@ foursector_sumh <- mari_cap_inith + (init_ff_h * 1e6) + (init_bivalve_h * 1e6) +
 init_pq_dfh <- tibble(sector = c("marine_capture", "inland_production", "finfish_mariculture", "bivalve_mariculture", "aggregate_lb", "aggregate_marine"),
                       quantity = c(mari_cap_inith, 60960038, init_ff_h * 1e6, init_bivalve_h * 1e6, foursector_sumh, threesector_sumh))
 
-write_csv(init_pq_dfh, paste0(bp_path, "project-materials/nature-revision/outputs/init_pq_dfh.csv"))
+## update path, save file. this will be used later in analysis.
+write_csv(init_pq_dfh, "init_pq_dfh.csv")
 
 
 ## 2007 prod
@@ -345,11 +351,3 @@ prod2007 <- hist_prod %>%
 sum(prod2007$total_q) / 1e6
 
 
-
-
- 
-# ## FAO projection is 52kg per captia in 2050
-# n_popt <- 9.8e9 ## UN article
-# fut_meat_need <- (52 * n_popt * 0.001) / 1e6
-# 
-# diff <- fut_meat_need - total_meat
