@@ -120,5 +120,5 @@ sc_capture_df2 <- sc_capture_df %>%
 ## update the path and save
 write.csv(sc_capture_df2, "harvest_x_price_x_conversion.csv")
 
-
+## run "aquaculture" scripts next
 
