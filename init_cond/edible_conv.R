@@ -1,23 +1,28 @@
 ## Tracey Mangin
 ## November 14, 2019
-## Landed weight to food weight df
+## Future food from the sea
+## Create converions: Landed weight to food weight df
+
 
 ## libraries
 library(tidyverse)
 
 ## read in relevant outputs/processed data
-upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F) %>%
+
+## note to user: update the path and load ProjectionData.csv
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F)
   filter(Year == 2012)
 
-fao_gp <- read.csv("~/Box/SFG Centralized Resources/Projects/Blue paper/data/GlobalProduction_2019.1.0/TS_FI_PRODUCTION.csv", stringsAsFactors = F)
+## note to user: update the path and load FAO data from init_cond_data/GlobalProduction_2019.1.0 folder
+fao_gp <- read.csv("GlobalProduction_2019.1.0/TS_FI_PRODUCTION.csv", stringsAsFactors = F)
 
-fao_source <- read.csv("~/Box/SFG Centralized Resources/Projects/Blue paper/data/GlobalProduction_2019.1.0/CL_FI_PRODUCTION_SOURCE.csv", stringsAsFactors = F) %>%
+fao_source <- read.csv("GlobalProduction_2019.1.0/CL_FI_PRODUCTION_SOURCE.csv", stringsAsFactors = F) %>%
   select(SOURCE = Identifier, Code, Name_En)
 
-fao_sp <- read.csv("~/Box/SFG Centralized Resources/Projects/Blue paper/data/GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFactors = F) %>%
+fao_sp <- read.csv("GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFactors = F) %>%
   select(SPECIES = X3Alpha_Code, ISSCAAP_Group, CPC_Class, CPC_Group)
 
-sp <- read.csv("~/Box/SFG Centralized Resources/Projects/Blue paper/data/GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFactors = F)
+sp <- read.csv("GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFactors = F)
 
 
 ## species types from upsides
@@ -146,9 +151,8 @@ convert_vals_all <- fao_gp3 %>%
   unique()
   
 
-## save conversion table
-write_csv(id_cats2, "bp1_nature/processed_data/isscaap_food_conv.csv")
 
 ## save conversion table with all species
-write_csv(convert_vals_all, "bp1_nature/processed_data/isscaap_food_conv_all.csv")
+## note to user: update path, save csv. This will be used later.
+write_csv(convert_vals_all, "isscaap_food_conv_all.csv")
 
