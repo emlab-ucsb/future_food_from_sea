@@ -2,32 +2,37 @@
 ## March 13, 2020
 ## Finalize sensitivity analyses
 
+## note to user: this creates information needed for sensitivity analysis
+
+
 library(tidyverse)
 
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
 
- ## read in id df
-id_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/id_df.rds"))
+## read in id df
+## note to user: change path and load file created in find_intersection.R
+id_df <- read_rds("id_df.rds")
 
 ## demand
 ## for trouble shooting
+## note to user: change path and load file created in demand_curves.R
 demand_df <- read_rds(paste0(bp_path,  "outputs/demand_curves_final.rds"))
 
 ## supply df
+## note to user: change path and load file created in all_supply_curves.rds
 supply_df <- read_rds(paste0(bp_path, "outputs/all_supply_curves.rds")) 
 
 supply_indiv_sect <- supply_df %>%
   filter(sector != "perf_substitutes")
 
 ## read in the indivual sector outputs
-bivalve_pts_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/bivalve_intersects.rds"))
-inland_pts_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/inland_intersects.rds"))
-finfish_pts_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/ff_intersects.rds"))
-capture_pts_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/capture_intersects.rds"))
+## note to user: change path and load files created in find_intersection.R
+bivalve_pts_df <- read_rds("bivalve_intersects.rds")
+inland_pts_df <- read_rds("inland_intersects.rds")
+finfish_pts_df <- read_rds("ff_intersects.rds")
+capture_pts_df <- read_rds("capture_intersects.rds")
 
 ## read in the perfect substitutes outputs
-ps_df <- read_rds(paste0(bp_path, "outputs/ss_analysis/ps_all_intersects.rds"))
+ps_df <- read_rds("ps_all_intersects.rds")
 
 ## fill in the missing pieces for capture fisheries
 ## ----------------------------------------------------
@@ -138,25 +143,7 @@ sensi_df <- rbind(perf_sub_df, ss_df_all2) %>%
   arrange(sub_scen, scenario2, demand_scen) %>%
   mutate(meat_mmt_yr = meat_yr / 1e6)
 
-write_csv(sensi_df, paste0(bp_path, "outputs/ss_analysis/all_si_outputs.csv"))
+## note to user: change path and save outputs for sensitivity analysis
+write_csv(sensi_df, "all_si_outputs.csv")
 
 
-# 
-# ## why are some finfish scenarios not matching?
-# stest <- supply_df %>% 
-#   filter(scenario2 == "price_responsive improved_tech spp 2 1 Scenario 3 - byproducts + directed",
-#          sector == "Finfish aquaculture")
-# 
-# dtest <- demand_df %>%
-#   filter(sector == "finfish_mariculture")
-# 
-# 
-# ggplot(stest %>% filter(meat_yr <= 10 * 1e6), aes(x = meat_yr / 1e6, y = price)) +
-#   geom_path(size = 1, color = "black") +
-#   geom_line(data = dtest %>% filter(quantity <= 10 * 1e6), aes(x = quantity / 1e6, y = price, color = demand_scen))
-# 
-# 
-# 
-# 
-# 
-# 
