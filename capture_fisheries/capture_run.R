@@ -5,6 +5,8 @@
 ## Run file -- this script runs the bioeconomic fishery model and produces fishery-level
 ## results used in the analysis.
 
+## This is STEP 1 for the marine capture fishery analysis.
+
 ## attach librariess
 library(tidyverse)
 library(janitor)
