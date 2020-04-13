@@ -2,15 +2,14 @@
 ## March 11, 2020
 ## create file with all supply curves
 
+## note to user: nmust run scripts in init_cond, capture_fisheries, and aquaculture folder first (outputs needed).
+## this creates a file with all supply curves (inland, marine capture, mariculture)
 
 library(tidyverse)
 
-
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
-
 ## marine supply curves
-data <- read_rds(paste0(bp_path, "outputs/WC_AQ_supply_curve_merged_all_scenarios.Rds"))
+## note to user: change path, read in output from aquaculture WC_AQ_supply_curve_merged_all_scenarios.Rds
+data <- read_rds("WC_AQ_supply_curve_merged_all_scenarios.Rds")
 
 ## scenario = unique identifier for scenario
 ## cap_scen = capture fisheries scenario
@@ -23,12 +22,15 @@ data <- read_rds(paste0(bp_path, "outputs/WC_AQ_supply_curve_merged_all_scenario
 ## meat_yr = edible meat production (mt/yr)
                        
 ## inland production
-inland_sc <- read_csv(paste0(bp_path, "outputs/inland_supply_dat.csv")) %>%
+## note to user: change the following paths and load inland fishery files.
+## these files are created in the inland_supply_code_data folder.
+
+inland_sc <- read_csv("inland_supply_dat.csv") %>%
   select(price = prices, food_mt = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "constant_cap")
 
-inland_sc_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_harvest.csv")) %>%
+inland_sc_h <- read_csv("inland_supply_dat_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "constant_cap") %>%
@@ -36,12 +38,12 @@ inland_sc_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_harvest.csv")
   select(sector, inl_scen, price, harvest, food_mt)
 
 ##
-inland_lg <- read_csv(paste0(bp_path, "outputs/inland_supply_dat.csv")) %>%
+inland_lg <- read_csv("inland_supply_dat.csv") %>%
   select(price = prices, food_mt = total_inland_supply_const_capt) %>%
   mutate(sector = "Inland",
          inl_scen = "low_growth")
 
-inland_lg_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_harvest.csv")) %>%
+inland_lg_h <- read_csv("inland_supply_dat_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_const_capt) %>%
   mutate(sector = "Inland",
          inl_scen = "low_growth") %>%
@@ -49,12 +51,12 @@ inland_lg_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_harvest.csv")
   select(sector, inl_scen, price, harvest, food_mt)
 
 ##
-inland2 <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_low_elast.csv")) %>%
+inland2 <- read_csv("inland_supply_dat_low_elast.csv") %>%
   select(price = prices, food_mt = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "low_elast")
 
-inland2_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_low_elast_harvest.csv")) %>%
+inland2_h <- read_csv("inland_supply_dat_low_elast_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "low_elast") %>%
@@ -62,12 +64,12 @@ inland2_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_low_elast_harve
   select(sector, inl_scen, price, harvest, food_mt)
 
 ##
-inland3 <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high_elast.csv")) %>%
+inland3 <- read_csv("inland_supply_dat_high_elast.csv") %>%
   select(price = prices, food_mt = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "high_elast")
 
-inland3_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high_elast_harvest.csv")) %>%
+inland3_h <- read_csv("inland_supply_dat_high_elast_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "high_elast") %>%
@@ -75,12 +77,12 @@ inland3_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high_elast_harv
   select(sector, inl_scen, price, harvest, food_mt)
 
 ##
-inland4 <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high growth.csv")) %>%
+inland4 <- read_csv("inland_supply_dat_high growth.csv") %>%
   select(price = prices, food_mt = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "high_growth")
 
-inland4_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high growth_harvest.csv")) %>%
+inland4_h <- read_csv("inland_supply_dat_high growth_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_2050_constcapt) %>%
   mutate(sector = "Inland",
          inl_scen = "high_growth") %>%
@@ -89,12 +91,12 @@ inland4_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_high growth_har
 
 
 ##
-inland_pr_df <- read_csv(paste0(bp_path, "outputs/inland_supply_dat.csv")) %>%
+inland_pr_df <- read_csv("inland_supply_dat.csv") %>%
   select(price = prices, food_mt = total_inland_supply_2050_prc) %>%
   mutate(sector = "Inland",
          inl_scen = "price_responsive") 
 
-inland_pr_df_h <- read_csv(paste0(bp_path, "outputs/inland_supply_dat_harvest.csv")) %>%
+inland_pr_df_h <- read_csv("inland_supply_dat_harvest.csv") %>%
   select(price = prices, harvest = total_inland_supply_2050_prc) %>%
   mutate(sector = "Inland",
          inl_scen = "price_responsive") %>%
@@ -136,13 +138,14 @@ data_all_agg <- data_all_ind %>%
   ungroup() %>%
   filter(price <= max(inland_sc_df2$price))
 
-
-saveRDS(data_all_agg, paste0(bp_path, "outputs/perf_sub_supply_curves.rds"))
+## update path, save file. use in other scripts.
+saveRDS(data_all_agg, "perf_sub_supply_curves.rds")
 
 ## put it all together and save
 data_all <- rbind(data_all_ind, data_all_agg)
 
-saveRDS(data_all, paste0(bp_path, "outputs/all_supply_curves.rds"))
+## update path, save file. use in other scripts.
+saveRDS(data_all, "all_supply_curves.rds")
 
 ## save smaller version for main text
 data_sub <- data_all %>%
@@ -152,7 +155,8 @@ data_sub <- data_all %>%
          aq_cost_scalar == 1,
          aq_scen %in% c("Scenario 3 - byproducts + directed", "Scenario 4a - tech advance", "Scenario 4b - tech advance", "Scenario 4c - tech advance"))
 
-saveRDS(data_sub, paste0(bp_path, "outputs/subset_supply_curves.rds"))
+## update path, save file. use in other scripts.
+saveRDS(data_sub, "subset_supply_curves.rds")
 
 
 
