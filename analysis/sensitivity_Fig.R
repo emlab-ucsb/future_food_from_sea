@@ -2,13 +2,14 @@
 ## March 16, 2020
 ## Make sensitivity plot
 
+## note to user: this creates a figure in the SI
+
 library(tidyverse)
 library(ggridges)
 
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
 
 ## read in the sensitivity analysis outputs
+## note to user: change path and load files created in sensitivity_analysis.R
 sa_df <- read_csv(paste0(bp_path, "outputs/ss_analysis/all_si_outputs.csv"))
 
 ## capture
@@ -147,28 +148,9 @@ splot <- ggplot(ss_all, aes(x = meat_mmt_yr, y = sector, color = sub_scen, point
         legend.title = element_blank(),
         legend.position = "top")
 
-ggsave(filename =  paste0(bp_path, "figures/si_ridge.png"), splot, width = 10, height = 6, units = "in", dpi = 300)
 
-# ## get rid of stuff below zero
-# 
-# ggplot(ss_all, aes(meat_mmt_yr, sector, color = sub_scen, point_color = sub_scen, fill = sub_scen, height = ..density..)) +
-#   geom_density_ridges(stat = "binline", 
-#                       binwidth = 1,
-#                       draw_baseline = F,
-#                       scale = 0.95,
-#                       size = 0.5,
-#                       alpha = 0.6) +
-#   scale_x_continuous(expand = c(0, 0), name = "Food production (mmt)") +
-#   scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
-#   scale_color_manual(values = c("#D55E00", "#0072B2"), guide = "none") +
-#   scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"), guide = "none") +
-#   coord_cartesian(clip = "off") +
-#   guides(fill = guide_legend(title="Demand", override.aes = list(fill = c("#D55E00A0", "#0072B2A0"),
-#                                                                  color = NA, point_color = NA))) +
-#   theme_ridges(center = TRUE) +
-#   theme(axis.title.y = element_blank(),
-#         legend.title = element_blank(),
-#         legend.position = "top")
+## note to user: change path and save SI fig
+ggsave(filename =  "si_ridge.png", splot, width = 10, height = 6, units = "in", dpi = 300)
 
 
 
@@ -180,28 +162,8 @@ mean_df <- ss_all %>%
   summarise(mean_food_prod = mean(meat_mmt_yr)) %>%
   ungroup()
 
-write_csv(mean_df, paste0(bp_path, "text_tables/mean_ridges.csv"))
+## note to user: change path and save outputs
+write_csv(mean_df, "mean_ridges.csv")
 
 
 
-
-# Plot= ggplot(data=DFtmp, aes(x = Production, y = Sector, color = as.factor(PerfSubstitutes), point_color = as.factor(PerfSubstitutes), fill = as.factor(PerfSubstitutes))) +
-#   geom_density_ridges(
-#     jittered_points = TRUE, scale = .95, rel_min_height = .01,
-#     point_shape = "|", point_size = 3, size = 0.25,
-#     position = position_points_jitter(height = 0)
-#   ) +
-#   scale_y_discrete(expand = c(0, 0)) +
-#   scale_x_continuous(expand = c(0, 0), name = "Production (mmt)") +
-#   scale_fill_manual(values = c("#D55E0050", "#0072B250"), labels = c("Independent", "Substitutes")) +
-#   scale_color_manual(values = c("#D55E00", "#0072B2"), guide = "none") +
-#   scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"), guide = "none") +
-#   coord_cartesian(clip = "off") +
-#   guides(fill = guide_legend(
-#     title="Demand",
-#     override.aes = list(
-#       fill = c("#D55E00A0", "#0072B2A0"),
-#       color = NA, point_color = NA)
-#   )
-#   ) +
-#   theme_ridges(center = TRUE)
