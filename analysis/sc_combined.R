@@ -1,6 +1,11 @@
 ## Tracey Mangin
 ## December 15, 2019
 ## combined supply curves
+## future food from the sea
+
+## note to user: must run scripts in init_cond, capture_fisheries, and aquaculture folder first (outputs needed).
+## must run all_supply_curves.R first to create file needed here.
+## this script creates figure 3 in the main text.
 
 library(tidyverse)
 library(janitor)
@@ -9,33 +14,32 @@ library("wesanderson")
 library(plotly)
 library(viridis)
 
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
 
 ## all data
-data <- read_rds(paste0(bp_path, "outputs/subset_supply_curves.rds"))
+## note to user: update path, read file created in all_supply_curves.R
+data <- read_rds("subset_supply_curves.rds")
 
-# ## set pathstart
-# pathstart <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/"
-# 
-# Directories
-# supdatadir <- "aquaculture_v2/output"
 
 ## initial production and price
-init_pq_df <- read_csv(paste0(bp_path, "outputs/init_pq_df.csv"))
+## note to user: update path, read file created in init_conditions.R
+init_pq_df <- read_csv("init_pq_df.csv")
 
-# ## read in relevant outputs/processed data
-upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F) 
+## read in relevant outputs/processed data
+## note to user -- update the following line of code to load ProjectionData.csv
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F)
 
 ## read in projection df
-projection_df <- readRDS("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/projection_outputs.rds")
+## note to user -- update the following line of code to load file created in catpure_run.R
+projection_df <- readRDS("projection_outputs.rds")
 
 ## conversion factors
-conv_vals <- read_csv("bp1_nature/processed_data/isscaap_food_conv_all.csv") %>%
+## note to user -- update path, load file created in edible_conv.R file
+conv_vals <- read_csv("isscaap_food_conv_all.csv") %>%
   filter(seafood_type != "plant")
 
 ## get fao scale value
-fao_scale_df <- read_csv(paste0(bp_path, "outputs/upside_fao_scale_df.csv"))
+## note to user: update path, read file created in init_conditions.R
+fao_scale_df <- read_csv("outputs/upside_fao_scale_df.csv")
 
 ## scale for reduction fisheries
 red_scale_mult <- 1 - 0.18
@@ -46,7 +50,8 @@ cf_scale_val <- fao_scale_df %>%
   as.numeric()
 
 ## supply curves -- for pulling out bau scenario
-mc_supply <- read_csv("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/harvest_x_price_x_conversion.csv") %>%
+## note to user: update path, read file created sc_outputs.R
+mc_supply <- read_csv("harvest_x_price_x_conversion.csv") %>%
   select(-X1)
 
 ## calculate FMSY supply in 2050 for supply curves
@@ -426,10 +431,10 @@ combined_fig <- ggplot(supply_curves_wc, aes(x = total_ed / 1e6, y = price, grou
         legend.box = "vertical",
         legend.key.width = unit(1.5, "cm")) 
 
-# ggsave(filename =  paste0(savepath, "sc_v2.png"), combined_fig, width = 16, height = 10, units = "in", dpi = 300)
 
-ggsave(filename = paste0(bp_path, "figures/fig3.png"), combined_fig, width = 16, height = 10, units = "in", dpi = 300)
-ggsave(filename = paste0(bp_path, "figures/fig3_600dpi.png"), combined_fig, width = 16, height = 10, units = "in", dpi = 600)
+## note to user: update path, save figure (fig 3 main text.)
+ggsave(filename = "figures/fig3.png", combined_fig, width = 16, height = 10, units = "in", dpi = 300)
+ggsave(filename = "figures/fig3_600dpi.png", combined_fig, width = 16, height = 10, units = "in", dpi = 600)
 
 
 
