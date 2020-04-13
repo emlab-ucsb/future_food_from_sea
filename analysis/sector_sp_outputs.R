@@ -170,7 +170,8 @@ final_indiv_df <- indiv_prod_vals %>%
   mutate(tot_meat_mmt = sum(meat_yr_mmt)) %>%
   ungroup()
 
-write_csv(final_indiv_df, paste0(bp_path, "outputs/sector_sp_prod_final.csv"))
+## note to user: change path, save file for use in donut_fig.R
+write_csv(final_indiv_df, "sector_sp_prod_final.csv")
 
 
 final_indiv_df2 <- final_indiv_df %>%

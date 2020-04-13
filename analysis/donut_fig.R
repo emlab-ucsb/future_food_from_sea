@@ -2,19 +2,21 @@
 ## December 16, 2019
 ## America Runs on Dunkin' Donut Figures
 
+## Future food from the sea
+## this script creates fig 5 in the main text and relevant information
+
 library(tidyverse)
 library(scales)
 
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
-
 ## read in csv
-final_indiv_df <- read_csv(paste0(bp_path, "outputs/sector_sp_prod_final.csv")) %>%
+## note to user: change path and read in file saved in sector_sp_outputs.R
+final_indiv_df <- read_csv("sector_sp_prod_final.csv") %>%
   filter(sector != "Inland fisheries") %>%
   select(scenario:meat_yr)
 
 ## initial production and price
-init_pq_df <- read_csv(paste0(bp_path, "outputs/init_pq_df.csv"))
+## note to user: change path, load file created in init_conditions.R
+init_pq_df <- read_csv("init_pq_df.csv")
 
 
 donut_df <- final_indiv_df %>%
@@ -107,7 +109,8 @@ donut_fig <- ggplot(donut_df4, aes(x=1.7, y=rel_prod, fill=sector, width = tot_p
         axis.text = element_blank(),
         axis.ticks = element_blank())
 
-ggsave(filename =  paste0(bp_path, "figures/fig5.png"), donut_fig, width = 10, height = 10, units = "in", dpi = 300)
+## note to user -- change path and save figure 5 in main text
+ggsave(filename =  "fig5.png", donut_fig, width = 10, height = 10, units = "in", dpi = 300)
 
 
 ## compare outputs to initial
