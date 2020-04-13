@@ -1,6 +1,6 @@
 ## Tracey Mangin
 ## March 10, 2020
-## BP demand figures
+## future food from the sea: figures for SI
 
 library(tidyverse)
 library(janitor)
@@ -13,20 +13,21 @@ library(cowplot)
 library(gridExtra)
 
 
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/"
-
 ## supply curves for main text
-data <- read_rds(paste0(bp_path, "outputs/subset_supply_curves.rds"))
+## note to user: change path and read in file created in all_supply_curves.R
+data <- read_rds("subset_supply_curves.rds")
 
 ## initial production and price
-init_pq_df <- read_csv(paste0(bp_path, "outputs/init_pq_df.csv"))
+## note to user: change path and read in file created in init_conditions.R
+init_pq_df <- read_csv("init_pq_df.csv")
 
 ## demand
-demand_df <- read_rds(paste0(bp_path,  "outputs/demand_curves_final.rds"))
+## note to user: change path and read in file created in demand_curves.R
+demand_df <- read_rds("demand_curves_final.rds")
 
 ## read in csv
-final_indiv_df <- read_csv(paste0(bp_path, "outputs/sector_sp_prod_final.csv"))
+## note to user: change path and read in file created in sector_sp_outputs.R
+final_indiv_df <- read_csv("sector_sp_prod_final.csv")
 
 
 ## ADD PERFECT SUB SUPPLY CURVE WITHOUT LAND BASED
@@ -189,10 +190,8 @@ agg_sup_dem <- ggplot(data2, aes(y = meat_yr / 1e6, x = price)) +
         legend.text = element_text(size = 14),
         strip.text = element_text(size = 16))
 
-# ggsave(filename =  paste0(bp_path, "figures/si_2.png"), agg_sup_dem, width = 10, height = 5, units = "in", dpi = 300)
-# 
-
-ggsave(filename = paste0(bp_path, "figures/si_1_updated.png"), arrangeGrob(agg_sc, agg_sup_dem, ncol = 1), width = 8, height = 10, units = "in", dpi = 300)
+## note to user: change path and save si figure
+ggsave(filename = "si_1_updated.png", arrangeGrob(agg_sc, agg_sup_dem, ncol = 1), width = 8, height = 10, units = "in", dpi = 300)
 
 
 ## -----------------------------------
@@ -437,8 +436,8 @@ donut_sector_df5 <- donut_df4_ss %>%
 donut_sector_df5$substitute <- factor(donut_sector_df5$substitute,
                                   levels = c("Separate sectors", "Perfect substitutes"))
 
-
-write_csv(donut_sector_df5, paste0(bp_path, "text_tables/si_prod_all_sources.csv"))
+## note to user: change path and save the file for SI
+write_csv(donut_sector_df5, "si_prod_all_sources.csv")
 
 
 ## Time to make the donuts
@@ -468,18 +467,21 @@ donut_si_fig <- ggplot(donut_sector_df5, aes(x=1.7, y=rel_prod, fill=sector, wid
         axis.text = element_blank(),
         axis.ticks = element_blank())
 
-ggsave(filename =  paste0(bp_path, "figures/si_donut.png"), donut_si_fig, width = 8, height = 10, units = "in", dpi = 300)
+## note to user: change path and save the si figure
+ggsave(filename =  "si_donut.png", donut_si_fig, width = 8, height = 10, units = "in", dpi = 300)
 
 
 
 ## MAKE TABLE WITH HARVEST
 ## --------------------------------------
 
-##
-init_pq_dfh <- read_csv(paste0(bp_path, "outputs/init_pq_dfh.csv"))
+## note to user: change path and read in file init_conditions.csv
+init_pq_dfh <- read_csv("init_pq_dfh.csv")
 
 ## supply curves
-mc_supply <- read_csv(paste0(bp_path, "outputs/harvest_x_price_x_conversion.csv")) %>%
+
+## note to user: change path and read in file created in sc_outputs.R
+mc_supply <- read_csv("harvest_x_price_x_conversion.csv") %>%
   select(-X1) %>%
   filter(scenario == "original_inputs") %>%
   group_by(price) %>%
@@ -625,7 +627,7 @@ donut_sector_df5h[is.na(donut_sector_df5h)] <- 0
 # donut_sector_df5$substitute <- factor(donut_sector_df5$substitute,
 #                                       levels = c("Separate sectors", "Perfect substitutes"))
 
-
-write_csv(donut_sector_df5h, paste0(bp_path, "text_tables/si_prod_all_sources_harvest.csv"))
+## note to user: change path and save for the SI
+write_csv(donut_sector_df5h, "si_prod_all_sources_harvest.csv")
 
 
