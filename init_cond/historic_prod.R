@@ -48,8 +48,8 @@ sp <- read.csv("GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFa
 
 ## read price databases
 ## note to user: update the path and load price data from ffts/init_cond_data folder
-prices <- read_csv("ffts/init_cond_data folder/Exvessel price comparison national data.csv")
-prices_est <- read_csv("ffts/init_cond_data folder/Exvessel Price Database.csv")
+# prices <- read_csv("ffts/init_cond_data folder/Exvessel price comparison national data.csv")
+# prices_est <- read_csv("ffts/init_cond_data folder/Exvessel Price Database.csv")
 
 ## scientfic name
 sci_name <- sp %>%
