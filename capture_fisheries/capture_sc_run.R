@@ -1,37 +1,38 @@
 ## Tracey Mangin
 ## March 6, 2020
-## Compute supply curves
+## Future of Food From the Sea
+
+## Create supply curves -- this script uses outputs from they fishery model and produces supply curves
+
+## Make sure to run files in init_cond folder before proceeding.
+
+## This is STEP 2 for the marine capture fishery analysis. 
 
 ## attach librariess
 library(tidyverse)
 library(purrr)
 library(furrr)
 
-## save path
-savepath <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/Figures/"
-
-## bp path
-bp_path <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision/outputs/"
-
 ## source functions
 functions <- list.files(here::here("capture_functions"))
 
 walk(functions, ~ here::here("capture_functions", .x) %>% source()) # load local functions
 
-## set pathstart
-pathstart <- "~/Box/SFG Centralized Resources/Projects/Ocean Protein/"
-
 ## read in steady state file
-ss_outputs_scenarios <- read.csv("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/ss_outputs_scenarios.csv")
+## note to user: this file is produced in capture_run.R (STEP 1). 
+ss_outputs_scenarios <- read.csv("ss_outputs_scenarios.csv")
 
 ## read in projection df
-projection_df <- readRDS("~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/projection_outputs.rds")
+## note to user: this file is produced in capture_run.R (STEP 1). 
+projection_df <- readRDS("projection_outputs.rds")
 
 ## upsides
-upsides <- read.csv("~/Box/SFG Centralized Resources/Projects/Upsides/upside-share/ProjectionData.csv", stringsAsFactors = F)
+## note to user: update the path and load ProjectionData.csv
+upsides <- read.csv("/ffts/m_capture_data/ProjectionData.csv", stringsAsFactors = F)
 
 ## conversions
-conv_vals <- read_csv("bp1_nature/processed_data/isscaap_food_conv_all.csv")
+## note to user: update the path and load conversion file created in init_cond/edible_conv.R script.
+conv_vals <- read_csv("isscaap_food_conv_all.csv")
 
 ## filter for starting year (2012)
 upsides0 <- upsides %>%
@@ -43,7 +44,8 @@ filter_out <- upsides0 %>%
   filter(MSY > BMSY)
 
 ## get fao scale value
-fao_scale_df <- read_csv(paste0(bp_path, "upside_fao_scale_df.csv"))
+## note to user: update the path and load conversion file created in init_cond/init_conditions.R script.
+fao_scale_df <- read_csv("upside_fao_scale_df.csv")
 
 ## scale capture fishery production
 cf_scale_val <- fao_scale_df %>%
@@ -88,7 +90,8 @@ production_df <- future_map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-saveRDS(production_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_df, "production_df.rds")
 
 ## group by price
 production_df_smry <- production_df %>%
@@ -101,7 +104,8 @@ production_df_smry <- production_df %>%
          total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(production_df_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_smry.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_df_smry, "production_df_smry.rds")
 
 
 ## sensitivity analysis 1: improved tech
@@ -117,7 +121,8 @@ production_df_s1 <- future_map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-saveRDS(production_df_s1, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s1.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_df_s1, "production_df_s1.rds")
 
 ## group by price
 production_s1_smry <- production_df_s1 %>%
@@ -130,7 +135,8 @@ production_s1_smry <- production_df_s1 %>%
             total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(production_s1_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s1_smry.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_s1_smry, "production_s1_smry.rds")
 
 
 
@@ -147,7 +153,8 @@ production_df_s2 <- future_map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-saveRDS(production_df_s2, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s2.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_df_s2, "production_df_s2.rds")
 
 ## group by price
 production_s2_smry <- production_df_s2 %>%
@@ -160,7 +167,8 @@ production_s2_smry <- production_df_s2 %>%
             total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(production_s2_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s2_smry.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_s2_smry, "production_s2_smry.rds")
 
 
 
@@ -178,8 +186,8 @@ production_df_s3 <- future_map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-
-saveRDS(production_df_s3, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_df_s3.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_df_s3, "production_df_s3.rds")
 
 ## group by price
 production_s3_smry <- production_df_s3 %>%
@@ -192,16 +200,8 @@ production_s3_smry <- production_df_s3 %>%
             total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(production_s3_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/production_s3_smry.rds")
-
-
-
-# ## Adjust so that if the max is < 0, 0 produced.
-# production_df_adj <- production_df %>%
-#   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
-#          adj_profit = ifelse(adj_harvest == 0, 0, profit))
-# 
-# saveRDS(production_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/production_df_adj.rds")
+## note to user: update path and save rds file. 
+saveRDS(production_s3_smry, "production_s3_smry.rds")
 
 
 
@@ -230,7 +230,8 @@ fmsy_prod_df <- map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-saveRDS(fmsy_prod_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/fmsy_prod_df.rds")
+## note to user: update path and save rds file. 
+saveRDS(fmsy_prod_df, "fmsy_prod_df.rds")
 
 ## group by price
 fmsy_prod_smry <- fmsy_prod_df %>%
@@ -243,23 +244,11 @@ fmsy_prod_smry <- fmsy_prod_df %>%
             total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(fmsy_prod_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/fmsy_prod_smry.rds")
+## note to user: update path and save rds file. 
+saveRDS(fmsy_prod_smry, "fmsy_prod_smry.rds")
 
 
-
- 
-# # ## Adjust so that if the max is < 0, 0 produced.
-# # fmsy_prod_df_adj <- fmsy_prod_df %>%
-# #   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
-# #          adj_profit = ifelse(adj_harvest == 0, 0, profit))
-# # 
-# # saveRDS(fmsy_prod_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/fmsy_prod_df_adj.rds")
-# 
-# 
-# ## repeat, f0 only, max price == 5000
-# price_vals2 <- as.list(seq(0, 5000, 1))
-# 
-# 
+## repeat, with f0
 calc_f0_prod <- function(price_val, input_df) {
 
   f0_df <- input_df %>%
@@ -283,7 +272,8 @@ f0_prod_df <- map(price_vals,
   left_join(conv_vals) %>%
   mutate(food_2050 = h_2050_scl_red * convert_mult)
 
-saveRDS(f0_prod_df, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/f0_prod_df.rds")
+## note to user: update path and save rds file. 
+saveRDS(f0_prod_df, "f0_prod_df.rds")
 
 
 ## group by price
@@ -297,22 +287,7 @@ f0_prod_smry <- f0_prod_df %>%
             total_2050_food = sum(food_2050)) %>%
   ungroup()
 
-saveRDS(f0_prod_smry, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/final/f0_prod_smry.rds")
+## note to user: update path and save rds file. s
+saveRDS(f0_prod_smry, "f0_prod_smry.rds")
 
 
-
-
-# 
-# 
-# 
-# 
-# # ## Adjust so that if the max is < 0, 0 produced.
-# # f0_prod_df_adj <- f0_prod_df %>%
-# #   mutate(adj_harvest = ifelse(profit < 0, 0, harvest),
-# #          adj_profit = ifelse(adj_harvest == 0, 0, profit))
-# # 
-# # saveRDS(f0_prod_df_adj, "~/Box/SFG Centralized Resources/Projects/Ocean Protein/Outputs/Capture/data/f0_prod_df_adj.rds")
-# 
-# 
-# 
-# 
