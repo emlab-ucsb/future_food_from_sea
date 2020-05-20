@@ -46,11 +46,6 @@ fao_country <- read.csv("GlobalProduction_2019.1.0/CL_FI_COUNTRY_GROUPS.csv", st
 ## note to user: update the path and load FAO data contained in GlobalProduction_2019.1.0 folder.
 sp <- read.csv("GlobalProduction_2019.1.0/CL_FI_SPECIES_GROUPS.csv", stringsAsFactors = F) 
 
-## read price databases
-## note to user: update the path and load price data from ffts/init_cond_data folder
-# prices <- read_csv("ffts/init_cond_data folder/Exvessel price comparison national data.csv")
-# prices_est <- read_csv("ffts/init_cond_data folder/Exvessel Price Database.csv")
-
 ## scientfic name
 sci_name <- sp %>%
   select(alpha_code = X3Alpha_Code, sci_name = Scientific_Name, name_en = Name_En)
