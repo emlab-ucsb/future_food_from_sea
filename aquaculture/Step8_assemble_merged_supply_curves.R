@@ -42,9 +42,13 @@ data1 <- data %>%
   filter(aq_scen != "Scenario 2 - byproducts only") %>% 
   # Add corrected WC data
   left_join(wc, by=c("cap_scen"="scenario", "price"="price")) %>% 
-  mutate(mt_yr=ifelse(sector=="Capture fisheries", wc_dhc_yr, mt_yr)) %>% 
+  mutate(dhc_mt_yr=ifelse(sector=="Capture fisheries", wc_dhc_yr, mt_yr),
+         mt_yr=ifelse(sector=="Capture fisheries", wc_mt_yr, mt_yr)) %>% 
   # Remove unnecessary columns
-  select(-c(wc_mt_yr, wc_dhc_yr))
+  select(-c(wc_mt_yr, wc_dhc_yr)) %>% 
+  select(scenario:price, mt_yr, dhc_mt_yr, meat_yr) %>% 
+  # Eliminate duplicated rows
+  unique()
 
 # Export data
 saveRDS(data1, file.path(datadir, "WC_AQ_supply_curve_merged_all_scenarios.Rds"))
@@ -111,9 +115,9 @@ fdata <- data1 %>%
                                  "meat_yr"="Edible meat"),
          aq_cost_scalar=format(aq_cost_scalar, digits=2),
          aq_spp=recode_factor(aq_spp, 
-                             "1"="Salmon-like",
-                             "2"="Milkfish-like",
-                             "3"="Barramundi-like"))
+                              "1"="Salmon-like",
+                              "2"="Milkfish-like",
+                              "3"="Barramundi-like"))
 
 # Plot salmon data
 g <- ggplot(fdata %>% 
