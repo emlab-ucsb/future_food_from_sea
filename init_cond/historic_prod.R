@@ -129,7 +129,7 @@ write_csv(fe_prod, "historical_prod_x_sp.csv")
 
 ## land based production
 lb_prod_df <- fe_prod %>%
-  select(year, prod_type, location, sp_type, isscaap, species_cat, sci_name, name_en, harvest = quantity, food_mt) %>%
+  select(year, prod_type, location, sp_type, isscaap, species_cat, sci_name, name_en, harvest = quantity, food_mt) 
 
 
 write_csv(lb_prod_df, "land_based_production.csv")
