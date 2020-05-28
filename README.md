@@ -21,7 +21,7 @@ All external data can be downloaded from the study’s Dryad repository. You may
 
 ## Data prep and initial conditions: Part I (folder: `init_cond`)
 
-**`edible_conv.R`**
+### `edible_conv.R`
 
 This script creates a table that we use to match each fishery with a conversion factor that allows for converting between live weight and edible animal protein. Conversions are based on those published in Edwards et al. 2019. We use this table to convert species-level historical landings as reported by the FAO as well as our projected harvests into edible food equivalents. 
 
@@ -34,7 +34,7 @@ Input files:
 Output file:
 - `isscaap_food_conv_all.csv`
 
-**`historic_prod.R`**
+### `historic_prod.R`
 
 This script examines historical production from FAO data and organizes data for calculating initial production values. We filter the FAO historic production data for species harvested in marine environments. We also filter out plants and species that are not generally consumed as food (e.g., natural sponges, turtles, whales). Then we use the `isscaap_food_conv_all.csv` file produced above to match conversion values with production, matching by ISSCAAP category. This script creates Fig. 1.
 
