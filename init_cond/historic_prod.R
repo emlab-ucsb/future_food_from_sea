@@ -127,12 +127,12 @@ fe_prod <- fao_convers %>%
 write_csv(fe_prod, "historical_prod_x_sp.csv")
 
 
-# ## land based production
-# lb_prod_df <- fe_prod %>%
-#   select(year, prod_type, location, sp_type, isscaap, species_cat, sci_name, name_en, harvest = quantity, food_mt) %>%
-#   
-#   
-# write_csv(lb_prod_df, "land_based_production.csv")
+## land based production
+lb_prod_df <- fe_prod %>%
+  select(year, prod_type, location, sp_type, isscaap, species_cat, sci_name, name_en, harvest = quantity, food_mt) %>%
+
+
+write_csv(lb_prod_df, "land_based_production.csv")
 
 fe_prod_summary <- fe_prod %>%
   select(year, isscaap:sp_type, harvest = quantity, q_scl_red, food_mt) %>%
