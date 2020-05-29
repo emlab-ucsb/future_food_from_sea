@@ -14,7 +14,7 @@ DF1 = data.frame(PwOA=seq(.88,4.5,length.out=N)) %>%
   mutate(QwOA = 10/PwOA - 8/PwOA^2) %>%
   mutate(PwM = -.3/(QwM-3.5) +.6 ) %>%
   mutate(QwMSY = 3.5) %>%
-  dplyr::select(QwOA,PwOA,QwM,PwM,QwMSY,PwMSY)
+  select(QwOA,PwOA,QwM,PwM,QwMSY,PwMSY)
 
 DF2 = data.frame(Pm1=seq(.88,4.5,length.out=N)) %>%
   mutate(Pm2=seq(.9,4.5,length.out=N)) %>%
@@ -25,7 +25,7 @@ DF2 = data.frame(Pm1=seq(.88,4.5,length.out=N)) %>%
   mutate(Qm4 = .7*(tmp-1)+tmp) %>%
   mutate(Qm3 = .1*(tmp-1)+tmp) %>%
   mutate(Pm4 =  -.3/(tmp-3.5) +.7 ) %>%
-  dplyr::select(Qm1,Pm1,Qm2,Pm2,Qm3,Pm3,Qm4,Pm4)
+  select(Qm1,Pm1,Qm2,Pm2,Qm3,Pm3,Qm4,Pm4)
 
 DF_concept = bind_cols(DF1,DF2) #This is the dataframe you need
 
@@ -56,43 +56,42 @@ P2b = ggplot(data=DF_concept) +
 P2b
 
 
-
 ## organize the data
 ## -------------------------------
 
 wild1 <- DF_concept %>%
-  dplyr::select(quantity = QwOA, price = PwOA) %>%
+  select(quantity = QwOA, price = PwOA) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwOA")
 
 wild2 <- DF_concept %>%
-  dplyr::select(quantity = QwM, price = PwM) %>%
+  select(quantity = QwM, price = PwM) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwM")
 
 wild3 <- DF_concept %>%
-  dplyr::select(quantity = QwMSY, price = PwMSY) %>%
+  select(quantity = QwMSY, price = PwMSY) %>%
   mutate(sector = "Wild fisheries",
          scenario = "SwMSY")
 
 m1 <- DF_concept %>%
-  dplyr::select(quantity = Qm1, price = Pm1) %>%
+  select(quantity = Qm1, price = Pm1) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm1")
 
 m2 <- DF_concept %>%
-  dplyr::select(quantity = Qm2, price = Pm2) %>%
+  select(quantity = Qm2, price = Pm2) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm2")
 
 m3 <- DF_concept %>%
-  dplyr::select(quantity = Qm3, price = Pm3) %>%
+  select(quantity = Qm3, price = Pm3) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm3")
 
 
 m4 <- DF_concept %>%
-  dplyr::select(quantity = Qm4, price = Pm4) %>%
+  select(quantity = Qm4, price = Pm4) %>%
   mutate(sector = "Mariculture",
          scenario = "Sm4")
 
@@ -114,9 +113,9 @@ wild_labs <- fig2_wild %>%
   ungroup()
 
 wild_labs2 <- data.frame(lab = c('OA', 'R', 'MSY'))
-                                 
+
 wild_labs3 <- cbind(wild_labs, wild_labs2) %>%
-  dplyr::select(-management)
+  select(-management)
 
 
 mar_labs <- fig2_mar %>%
@@ -127,24 +126,33 @@ mar_labs <- fig2_mar %>%
 mar_labs2 <- data.frame(lab = c('M1', 'M2', 'M3', 'M4'))
 
 mar_labs3 <- cbind(mar_labs, mar_labs2) %>%
-  dplyr::select(-scenario)
+  select(-scenario)
 
 all_labs <- rbind(mar_labs3, wild_labs3)
 
+## figure with letters
+fig2_wild2 <- fig2_wild %>%
+  mutate(sector_lab = paste0("a ", sector))
 
-conceptual_fig <- ggplot(data = fig2_mar, aes(x = quantity, y = price, group = scenario, color = scenario)) +
-  geom_path(alpha = 0.9, size = 1.5) +
-  geom_path(data = fig2_wild, aes(x = quantity, y = price, group = management, lty = management), color = "#298fca", size = 1.5, alpha = 0.9, inherit.aes = F) +
-  facet_wrap(~sector, scales = "free") + 
+fig2_mar2 <- fig2_mar %>%
+  mutate(sector_lab = paste0("b ", sector))
+
+all_labs2 <- all_labs %>%
+  mutate(sector_lab = ifelse(sector == "Mariculture", paste0("b ", sector), paste0("a ", sector)))
+
+conceptual_fig <- ggplot(data = fig2_mar2, aes(x = quantity, y = price, group = scenario, color = scenario)) +
+  geom_path(alpha = 0.9, size = 0.4) +
+  geom_path(data = fig2_wild2, aes(x = quantity, y = price, group = management, lty = management), color = "black", size = 0.4, alpha = 0.9, inherit.aes = F) +
+  facet_wrap(~sector_lab, scales = "free") + 
   xlab("Quantity") +
   ylab("Price") +
-  geom_text_repel(data = all_labs, aes(x = quantity, y = price, label = lab), 
-             size = 7, inherit.aes = F) +
+  geom_text_repel(data = all_labs2, aes(x = quantity, y = price - 0.2, label = lab), 
+                  size = 2, inherit.aes = F) +
   # scale_color_manual(values = c("#00798c", "#edae49", "#d1495b")) +
   scale_color_manual(breaks = c("Sm1", "Sm2", "Sm3", "Sm4"),
-                     values = c("Sm1" = "black",
-                                "Sm2" = "#ff748c",
-                                "Sm3" = "#E69F00",
+                     values = c("Sm1" = "#D55E00",
+                                "Sm2" = "#F0E442",
+                                "Sm3" = "#0072B2",
                                 "Sm4" = "#009E73")) +
   scale_linetype_manual(breaks = c("SwOA", "SwM", "SwMSY"),
                         values = c("SwOA" = 1,
@@ -157,16 +165,58 @@ conceptual_fig <- ggplot(data = fig2_mar, aes(x = quantity, y = price, group = s
         panel.grid.minor = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        axis.title = element_text(size = 20),
-        title = element_text(size = 14),
-        legend.title = element_text(size = 20),
+        axis.title = element_text(size = 7),
+        title = element_text(size = 7),
+        legend.title = element_text(size = 7),
         legend.position = "none",
         # legend.text = element_text(size = 15),
-        strip.text = element_text(size = 20))
+        strip.text = element_text(size = 8, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"))
+
+## save path for figures
+savepath <- "/Volumes/GoogleDrive/Shared\ drives/emlab/projects/current-projects/blue-paper-1/project-materials/nature-revision-2/figures/"
+# ggsave(filename =  paste0(savepath, "fig2_conceptual.png"), conceptual_fig, width = 14, height = 8, units = "in", dpi = 300)
+ggsave(filename =  paste0(savepath, "fig2.pdf"), conceptual_fig, width = 120, height = 60, units = "mm", dpi = 600)
+
+conceptual_fig2 <- ggplot(data = fig2_mar2, aes(x = quantity, y = price, group = scenario, color = scenario)) +
+  geom_path(alpha = 0.9, size = 0.6) +
+  geom_path(data = fig2_wild2, aes(x = quantity, y = price, group = management, lty = management), color = "black", size = 0.6, alpha = 0.9, inherit.aes = F) +
+  facet_wrap(~sector_lab, scales = "free", ncol = 1) + 
+  xlab("Quantity") +
+  ylab("Price") +
+  geom_text_repel(data = all_labs2, aes(x = quantity, y = price - 0.2, label = lab),
+                  size = 5, inherit.aes = F) +
+  # scale_color_manual(values = c("#00798c", "#edae49", "#d1495b")) +
+  scale_color_manual(breaks = c("Sm1", "Sm2", "Sm3", "Sm4"),
+                     values = c("Sm1" = "#D55E00",
+                                "Sm2" = "#F0E442",
+                                "Sm3" = "#009E73",
+                                "Sm4" = "#0072B2")) +
+  scale_linetype_manual(breaks = c("SwOA", "SwM", "SwMSY"),
+                        values = c("SwOA" = 1,
+                                   "SwM" = 4,
+                                   "SwMSY" = 3)) +
+  # geom_hline(yintercept = pval0, lty = "dashed", color = "black") +
+  # annotate("text", x = 300, y = pval0 + 75, label = paste0("Current weighted average global price = $", format(round(pval0), nsmall=0, big.mark=","), " / mt"), size = 5) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_text(size = 10),
+        title = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        legend.position = "none",
+        # legend.text = element_text(size = 15),
+        strip.text = element_text(size = 10, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"))
+
+ggsave(filename =  paste0(savepath, "fig2_1col.pdf"), conceptual_fig2, width = 89, height = 150, units = "mm", dpi = 600)
+
 
 ## figure 2 in main text
 ## note to user: update path and save
-ggsave(filename =  "fig2_conceptual.png", conceptual_fig, width = 14, height = 8, units = "in", dpi = 300)
+ggsave(filename = "fig2_1col.pdf", conceptual_fig2, width = 89, height = 150, units = "mm", dpi = 600)
 
 
 
