@@ -12,6 +12,7 @@ library(janitor)
 library(scales)
 library("wesanderson")
 library(plotly)
+library(ggnewscale)
 library(viridis)
 
 
@@ -23,6 +24,10 @@ data <- read_rds("subset_supply_curves.rds")
 ## initial production and price
 ## note to user: update path, read file created in init_conditions.R
 init_pq_df <- read_csv("init_pq_df.csv")
+
+## initial production and price, harvest
+## note to user: update path, read file created in init_conditions.R
+init_pq_dfh <- read_csv(paste0(bp_path, "outputs/init_pq_dfh.csv"))
 
 ## read in relevant outputs/processed data
 ## note to user -- update the following line of code to load ProjectionData.csv
@@ -105,6 +110,16 @@ fmsy_proj_df2 <- expand_grid(seafood_type, price_vec) %>%
             meat_mt = sum(meat_mt)) %>%
   ungroup()
 
+fmsy_2050_mt <- unique(fmsy_proj_df2$mt)
+
+inith_mcf <- init_pq_dfh %>%
+  filter(sector == "marine_capture") %>%
+  select(quantity) %>%
+  as.numeric()
+
+## increase in harvest
+(fmsy_2050_mt - inith_mcf) / inith_mcf
+
 
 ## BAU
 ## ---------------
@@ -150,7 +165,8 @@ bau_prod <- mc_supply2 %>%
   mutate(mt_red = mt * red_scale_mult, 
          food_mt = mt_red * convert_mult) %>%
   group_by(price) %>%
-  summarise(tot_fod_mt = sum(food_mt, na.rm = T)) %>%
+  summarise(tot_mt = sum(mt, na.rm = T),
+            tot_food_mt = sum(food_mt, na.rm = T)) %>%
   ungroup() %>%
   filter(price == round(p0_marine))
 
@@ -160,9 +176,13 @@ rf_prod <- mc_supply2 %>%
   mutate(mt_red = mt * red_scale_mult, 
          food_mt = mt_red * convert_mult) %>%
   group_by(price) %>%
-  summarise(tot_fod_mt = sum(food_mt, na.rm = T)) %>%
+  summarise(tot_mt = sum(mt, na.rm = T),
+            tot_food_mt = sum(food_mt, na.rm = T)) %>%
   ungroup() %>%
   filter(price == round(p0_marine))
+
+## increase in harvest
+(as.numeric(rf_prod$tot_mt[1]) - inith_mcf) / inith_mcf
 
 ## fmsy reform
 fmsy_prod <- fmsy_proj_df2 %>%
@@ -295,11 +315,16 @@ pot_cp <- scen_a %>% filter(price == round(init_ffm_p)) %>%
 
 (pot_cp - init_ffm_q) / 1e6
 
-## production potential at current prices
-tech_prod_pot <- data_np %>% filter(price == round(init_ffm_p), sector == "Finfish mariculture") %>%
-  mutate(meat_year_mmt = meat_yr / 1e6) %>%
-  mutate(curr_prod = init_ffm_q,
-         delta_perc = (meat_yr - curr_prod) / curr_prod * 100)
+## production potential at current prices, total harvest lwe
+init_ffm_h <- init_pq_dfh %>%
+  filter(sector == "finfish_mariculture") %>%
+  select(quantity) %>%
+  as.numeric()
+
+tech_prod_pot_h <- data_np %>% filter(price == round(init_ffm_p), sector == "Finfish mariculture") %>%
+  mutate(mt_year_mmt = mt_yr / 1e6) %>%
+  mutate(curr_prod = init_ffm_h,
+         delta_perc = (mt_yr - curr_prod) / curr_prod * 100)
 
 ## bivalves
 ## --------------------------
@@ -329,8 +354,16 @@ pot_cp_b <- scen_a_b %>% filter(price == init_bm_p) %>%
 
 pot_cp_b - init_bm_q
 
+## production potential at current prices, total harvest lwe
+init_bm_h <- init_pq_dfh %>%
+  filter(sector == "bivalve_mariculture") %>%
+  select(quantity) %>%
+  as.numeric()
 
-
+tech_prod_pot_b_h <- data_np %>% filter(price == round(init_bm_p), sector == "Bivalve mariculture") %>%
+  mutate(mt_year_mmt = mt_yr / 1e6) %>%
+  mutate(curr_prod = init_bm_h,
+         delta_perc = (mt_yr - curr_prod) / curr_prod * 100)
 
 
 ## Combine the dataframes
@@ -375,66 +408,85 @@ supply_curves_m$sector <- factor(supply_curves_m$sector, levels = c("Finfish mar
 
 curr_dem_df2 <- curr_dem_df %>%
   mutate(sector = ifelse(sector == "marine_capture", "Marine wild fisheries",
-                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")))
+                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")),
+         sector_lab =  ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                              ifelse(sector == "Finfish mariculture", paste0("b ", sector), paste0("c ", sector))))
 
 curr_sup_df2 <- curr_sup_df %>%
   mutate(sector = ifelse(sector == "marine_capture", "Marine wild fisheries",
-                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")))
+                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")),
+         sector_lab =  ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                              ifelse(sector == "Finfish mariculture", paste0("b ", sector), paste0("c ", sector))))
 
 init_intersect <- init_pq_df %>%
   rename(total_ed = quantity) %>%
   filter(sector %in% c("marine_capture", "finfish_mariculture", "bivalve_mariculture")) %>%
   mutate(sector = ifelse(sector == "marine_capture", "Marine wild fisheries",
-                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")))
+                         ifelse(sector == "finfish_mariculture", "Finfish mariculture", "Bivalve mariculture")),
+         sector_lab =  ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                              ifelse(sector == "Finfish mariculture", paste0("b ", sector), paste0("c ", sector))))
+
+
+
+## ggplot supply curves
+# color_palette <- c("#8bbdd9", "#298fca", "#094c72")
+
+supply_curves_wc_n <- supply_curves_wc %>%
+  mutate(sector_lab = paste0("a ", sector))
+
+supply_curves_m_n <- supply_curves_m %>%
+  mutate(sector_lab = ifelse(sector == "Bivalve mariculture", paste0("c ", sector), paste0("b ", sector)))
 
 curr_dem_df2$sector <- factor(curr_dem_df2$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture"))
 curr_sup_df2$sector <- factor(curr_sup_df2$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture"))
 init_intersect$sector <- factor(init_intersect$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture"))
 
 
-## ggplot supply curves
-# color_palette <- c("#8bbdd9", "#298fca", "#094c72")
 
-combined_fig <- ggplot(supply_curves_wc, aes(x = total_ed / 1e6, y = price, group = scenario, lty = scenario)) +
-  geom_path(alpha = 0.9, color = "#298fca", size = 1.5) +
-  geom_path(data = supply_curves_m, aes(x = total_ed / 1e6, y = price, group = scenario, color = scenario), size = 1.5, inherit.aes = F) +
-  facet_wrap(~sector, scales = "free") + 
-  geom_line(data = curr_dem_df2, aes(x = total_ed, y = price, group = sector), size = 1, alpha = 0.8, lty = 1, color = "black", inherit.aes = F) +
-  geom_line(data = curr_sup_df2, aes(x = total_ed, y = price, group = sector), size = 1, alpha = 0.8, lty = 1, color = "black", inherit.aes = F) +
-  geom_point(data = init_intersect, aes(x = total_ed / 1e6, y = price, group = sector), size = 3, color = "black", inherit.aes = F) +
+combined_fig <- ggplot(supply_curves_wc_n, aes(x = total_ed / 1e6, y = price, group = scenario, color = scenario)) +
+  geom_path(alpha = 0.9, size = 0.5) +
+  scale_color_grey(name = "Marine wild scenario: ",
+                   breaks = c("F current", "Rational reform", "MSY")) +
+  new_scale_color() +
+  geom_path(data = supply_curves_m_n, aes(x = total_ed / 1e6, y = price, group = scenario, color = scenario), size = 0.5, inherit.aes = F) +
+  scale_color_manual(name = "Mariculture scenario: ",
+                     breaks = c("Policy reforms", "Tech innovation", "Tech innovation (Ambitious)"),
+                     values = c("Policy reforms" = "#009E73",
+                                "Tech innovation" = "#56B4E9",
+                                "Tech innovation (Ambitious)" = "#0072B2")) +
+  facet_wrap(~sector_lab, scales = "free") + 
+  geom_line(data = curr_dem_df2, aes(x = total_ed, y = price, group = sector), size = 0.25, alpha = 0.8, lty = 2, color = "black", inherit.aes = F) +
+  geom_line(data = curr_sup_df2, aes(x = total_ed, y = price, group = sector), size = 0.25, alpha = 0.8, lty = 2, color = "black", inherit.aes = F) +
+  geom_point(data = init_intersect, aes(x = total_ed / 1e6, y = price, group = sector), size = 2, color = "black", inherit.aes = F) +
   xlab("Edible production (mmt)") +
   ylab("Price (USD per mt)") +
   # scale_color_manual(values = c("#00798c", "#edae49", "#d1495b")) +
-  scale_color_manual(name = "Mariculture scenario: ",
-                     breaks = c("Policy reforms", "Tech innovation", "Tech innovation (Ambitious)"),
-                     values = c("Policy reforms" = "#E69F00",
-                                "Tech innovation" = "#a5d285",
-                                "Tech innovation (Ambitious)" = "#608341")) +
-  scale_linetype_manual(name = "Marine wild scenario: ",
-                        breaks = c("F current", "Rational reform", "MSY"),
-                        values = c("F current" = "solid", 
-                                   "Rational reform" = "dotted",
-                                   "MSY" = "dashed")) +
+  # scale_linetype_manual(name = "Marine wild scenario: ",
+  #                       breaks = c("F current", "Rational reform", "MSY"),
+  #                       values = c("F current" = "solid", 
+  #                                  "Rational reform" = 4,
+  #                                  "MSY" = "dotted")) +
   scale_y_continuous(label=comma) +
   # geom_hline(yintercept = pval0, lty = "dashed", color = "black") +
   # annotate("text", x = 300, y = pval0 + 75, label = paste0("Current weighted average global price = $", format(round(pval0), nsmall=0, big.mark=","), " / mt"), size = 5) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 20),
-        axis.title = element_text(size = 22),
-        title = element_text(size = 20),
-        legend.title = element_text(size = 22),
-        legend.position = "top",
-        legend.text = element_text(size = 20),
-        strip.text = element_text(size = 22),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        title = element_text(size = 7),
+        legend.title = element_text(size = 7),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7),
+        strip.text = element_text(size = 8, hjust = 0),
         legend.box = "vertical",
-        legend.key.width = unit(1.5, "cm")) 
+        # legend.key.width = unit(1.5, "cm"),
+        strip.background = element_rect(color = "white", fill = "white"),
+        legend.spacing.y = unit(-2, "mm"))
 
 
 ## note to user: update path, save figure (fig 3 main text.)
-ggsave(filename = "figures/fig3.png", combined_fig, width = 16, height = 10, units = "in", dpi = 300)
-ggsave(filename = "figures/fig3_600dpi.png", combined_fig, width = 16, height = 10, units = "in", dpi = 600)
+ggsave(filename = "figures/fig3.pdf", combined_fig, width = 136, height = 100, units = "mm", dpi = 600)
 
 
 
