@@ -45,6 +45,7 @@ data_ps3 <- data %>%
   
 supply_data <- data %>%
   mutate(sector = ifelse(sector == "perf_substitutes", "aggregate_lb", sector)) %>%
+  select(-dhc_mt_yr) %>%
   rbind(data_ps3)
 
  
@@ -256,7 +257,7 @@ indiv_prod_vals <- cross(list(dval = demand_vec,
 
 intersect_df <- indiv_prod_vals %>%
   select(scen_lab = scenario, demand_scen, price, total_meat_yr = meat_yr) %>%
-  mutate(price = round(price),
+  mutate(round_price = round(price),
          total_meat_yr = total_meat_yr / 1e6)
 
 supply_df <- supply_data %>%
@@ -283,7 +284,8 @@ supply_all_p_df <- supply_df %>%
                          ifelse(sector == "Inland", "Inland fisheries", sector)),
          scen_lab = ifelse(aq_scen == "Scenario 3 - byproducts + directed", "Policy reforms",
                            ifelse(aq_scen == "Scenario 4a - tech advance", "Tech innovation",
-                                  ifelse(aq_scen == "Scenario 4c - tech advance", "Tech innovation (Ambitious)", aq_scen))))
+                                  ifelse(aq_scen == "Scenario 4c - tech advance", "Tech innovation (Ambitious)", aq_scen)))) %>%
+  rename(round_price = price)
 
 
 
@@ -492,15 +494,18 @@ mc_supply <- read_csv("harvest_x_price_x_conversion.csv") %>%
 
 
 subst_donut_dfh <- sector_sup_df %>%
+  # mutate(round_price = round(price)) %>%
   select(scenario = scen_lab, sector, demand = demand_scen, price, mt_yr, meat_yr = sector_meat_yr, total_prod = total_meat_yr) %>%
-  mutate(mt_yr = ifelse(sector == "Marine wild fisheries", mc_supply$mt_yr[match(price, mc_supply$price)], mt_yr),
-         mt_yr = mt_yr / 1e6,
-         rel_prod = meat_yr / total_prod,
-         meat_yr_mmt = meat_yr,
-         tot_meat_mmt = total_prod) %>%
+  mutate(
+    # mt_yr2 = ifelse(sector == "Marine wild fisheries", mc_supply$mt_yr[match(round_price, mc_supply$price)], mt_yr),
+    mt_yr = mt_yr / 1e6,
+    rel_prod = meat_yr / total_prod,
+    meat_yr_mmt = meat_yr,
+    tot_meat_mmt = total_prod) %>%
   group_by(scenario, demand) %>%
   mutate(total_mt = sum(mt_yr, na.rm = T)) %>%
   ungroup()
+
 
 
 donut_dfh <- subst_donut_dfh %>%
@@ -568,16 +573,19 @@ supply_h <- data %>%
   select(sector:mt_yr) %>%
   mutate(sector = ifelse(sector == "Capture fisheries", "Marine wild fisheries",
                          ifelse(sector == "Bivalve aquaculture", "Bivalve mariculture",
-                                ifelse(sector == "Finfish aquaculture", "Finfish mariculture", "Inland fisheries"))))
+                                ifelse(sector == "Finfish aquaculture", "Finfish mariculture", "Inland fisheries")))) %>%
+  filter(sector == "Marine wild fisheries" | sector == "Inland fisheries") %>%
+  rename(round_price = price)
 
 
 donut_df_ssh <- final_indiv_df %>%
-  mutate(price = round(price)) %>%
+  mutate(round_price = round(price)) %>%
   left_join(supply_h) %>%
-  mutate(mt_yr = ifelse(sector == "Marine wild fisheries", mc_supply$mt_yr[match(price, mc_supply$price)], mt_yr)) %>%
+  mutate(mt_yr = ifelse(sector == "Bivalve mariculture", meat_yr * 6,
+                        ifelse(sector == "Finfish mariculture", meat_yr * 1.15, mt_yr)),
+         h_mmt_yr = mt_yr / 1e6) %>%
   group_by(demand) %>%
-  mutate(mt_yr_mmt = mt_yr / 1e6,
-         total_prod = sum(mt_yr_mmt)) %>%
+  mutate(total_prod_h = sum(h_mmt_yr)) %>%
   ungroup() %>%
   # mutate(rel_prod = meat_yr_mmt / total_prod) %>%
   arrange(scenario, demand, sector) %>%
@@ -586,13 +594,13 @@ donut_df_ssh <- final_indiv_df %>%
   # mutate(ymax = cumsum(rel_prod),
   #        ymin = c(0, head(ymax, n=-1))) %>%
   # ungroup() %>%
-  select(scenario, sector, demand, mt_yr_mmt) %>%
+  select(scenario, sector, demand, h_mmt_yr) %>%
   group_by(scenario, demand) %>%
-  mutate(adj_sum = sum(mt_yr_mmt)) %>%
-# ,
-#          rel_prod = meat_yr_mmt / adj_sum) %>%
+  mutate(adj_sum = sum(h_mmt_yr)) %>%
+  # ,
+  #          rel_prod = meat_yr_mmt / adj_sum) %>%
   ungroup() %>%
-  select(scenario, sector, demand, mt_yr = mt_yr_mmt) 
+  select(scenario, sector, demand, mt_yr = h_mmt_yr) 
 
 
 
