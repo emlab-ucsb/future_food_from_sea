@@ -18,7 +18,7 @@ data <- read_rds("WC_AQ_supply_curve_merged_all_scenarios.Rds")
 ## aq_cost_scalar = aquaculture cost scalar (0.75, 1.00, 1.50, 2.00)
 ## sector = capture, bivalve aq, finish aq
 ## price = USD/mt
-## mt_yr = total production (mt/yr)
+## dhc_mt_yr = harvest (live weight) accounting for reduction fisheries (ie, 18% of total harvest removed)
 ## meat_yr = edible meat production (mt/yr)
                        
 ## inland production
@@ -105,7 +105,8 @@ inland_pr_df_h <- read_csv("inland_supply_dat_harvest.csv") %>%
 
 inland_sc_df <- rbind(inland_sc_h, inland_lg_h, inland2_h, inland3_h, inland4_h, inland_pr_df_h) %>%
   rename(mt_yr = harvest, meat_yr = food_mt) %>%
-  select(inl_scen, sector, price, mt_yr, meat_yr) 
+  mutate(dhc_mt_yr = mt_yr) %>%
+  select(inl_scen, sector, price, mt_yr, dhc_mt_yr, meat_yr) 
 
 
 ### 
@@ -134,6 +135,7 @@ data_all_agg <- data_all_ind %>%
   group_by(scenario2, scenario, inl_scen, cap_scen, aq_spp, aq_scen, aq_cost_scalar, price) %>%
   summarise(sector = "perf_substitutes",
             mt_yr = sum(mt_yr),
+            dhc_mt_yr = sum(dhc_mt_yr),
             meat_yr = sum(meat_yr)) %>%
   ungroup() %>%
   filter(price <= max(inland_sc_df2$price))
