@@ -184,21 +184,21 @@ hist_food_fig <- ggplot(hist_food_df, aes(x = year, y = total_q / 1e6, group = c
   theme(axis.title.x = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 18),
-        axis.title = element_text(size = 22),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
         plot.title = element_blank(),
         legend.position = c(0.75, 0.85),
-        legend.text = element_text(size = 22),
-        strip.text = element_text(size = 20),
+        legend.text = element_text(size = 7),
         legend.title = element_blank(),
-        plot.margin = margin(10, 20, 10, 10))
+        plot.margin = margin(10, 20, 10, 10),
+        strip.text = element_text(size = 8, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"))
 
 ## note to user: figure created for SI -- change path and save.
 ggsave("si_histprod.png", hist_food_fig, width = 12, height = 8, units = "in", dpi = 300)
 
 
-
-## figure
+## figure 1
 hist_food_fig2 <- ggplot(hist_food_df %>% filter(prod_lab %in% c("Marine capture", "Mariculture")), aes(x = year, y = total_q / 1e6, group = cat, fill = prod_lab)) +
   geom_area() +
   facet_wrap(~lab, ncol = 2) +
@@ -207,21 +207,25 @@ hist_food_fig2 <- ggplot(hist_food_df %>% filter(prod_lab %in% c("Marine capture
   ylab("Global production (mmt)") +
   # ggtitle("Historical food from the sea") +
   theme_bw() +
+  guides(fill = guide_legend(override.aes = list(size = 0.3))) +
   theme(axis.title.x = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 18),
-        axis.title = element_text(size = 22),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
         plot.title = element_blank(),
-        legend.position = c(0.75, 0.85),
-        legend.text = element_text(size = 22),
-        strip.text = element_text(size = 20),
+        legend.position = c(0.87, 0.87),
+        legend.text = element_text(size = 7),
         legend.title = element_blank(),
-        plot.margin = margin(10, 20, 10, 10))
+        legend.key.size = unit(2, "mm"),
+        plot.margin = margin(10, 20, 10, 10),
+        strip.text = element_text(size = 8, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"))
 
 
 ## note to user: figure created for main text -- change path and save.
-ggsave("figures/fig1.png", hist_food_fig2, width = 12, height = 8, units = "in", dpi = 300)
+ggsave(filename =  "fig1.pdf", hist_food_fig2, width = 120, height = 60, units = "mm", dpi = 600)
+
 
 
 
