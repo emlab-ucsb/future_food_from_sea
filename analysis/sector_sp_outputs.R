@@ -19,6 +19,11 @@ data <- read_rds("subset_supply_curves.rds")
 ## note to user: change path, load file created in init_conditions.R
 init_pq_df <- read_csv("init_pq_df.csv")
 
+## initial production and price, harvest
+## note to user: change path, load file created in init_conditions.R
+init_pq_dfh <- read_csv(paste0(bp_path, "outputs/init_pq_dfh.csv"))
+
+
 ## demand
 ## note to user: change path, load file created in demand_curves.R
 demand_df <- read_rds("demand_curves_final.rds")
@@ -58,7 +63,9 @@ indiv_supply2 <- data_np %>%
                               ifelse(sector == "Marine wild fisheries", 200e6, 200e6)))) %>%
   filter(price <= ymax,
          meat_yr <= xmax) %>%
-  mutate(curve_type = "Supply")
+  mutate(curve_type = "Supply",
+         sector_lab = ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                             ifelse(sector == "Bivalve mariculture", paste0("c ", sector), paste0("b ", sector))))
 
 
 indiv_supply2$sector <- factor(indiv_supply2$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture", "Inland fisheries"))
@@ -75,8 +82,10 @@ indiv_demand2 <- indiv_demand %>%
   filter(price <= ymax,
          meat_yr <= xmax) %>%
   mutate(demand_scen = ifelse(demand_scen == "current", "Current",
-                       ifelse(demand_scen == "future", "Future", "Extreme"))) %>%
-  mutate(curve_type = "Demand")
+                              ifelse(demand_scen == "future", "Future", "Extreme"))) %>%
+  mutate(curve_type = "Demand",
+         sector_lab = ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                             ifelse(sector == "Bivalve mariculture", paste0("c ", sector), paste0("b ", sector))))
 
 indiv_demand2$demand_scen <- factor(indiv_demand2$demand_scen, levels = c("Current", "Future", "Extreme"))
 indiv_demand2$sector <- factor(indiv_demand2$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture", "Inland fisheries"))
@@ -173,10 +182,40 @@ final_indiv_df <- indiv_prod_vals %>%
 ## note to user: change path, save file for use in donut_fig.R
 write_csv(final_indiv_df, "sector_sp_prod_final.csv")
 
+## add mt
+mt_df <- data_np %>%
+  filter(sector %in% c("Marine wild fisheries", "Inland fisheries")) %>%
+  select(scenario = scen_lab, sector, price, mt_yr, food_yr = meat_yr) %>%
+  filter(price %in% unique(round(final_indiv_df$price))) %>%
+  rename(round_price = price)
+
+## get LWE values, take capture from supply curve file, calculate for finfish mariculture and bivalve mariculture using conversion rate
+final_indiv_df_mt <- final_indiv_df %>%
+  mutate(round_price = round(price)) %>%
+  left_join(mt_df) %>%
+  mutate(mt_yr = ifelse(sector == "Finfish mariculture", meat_yr * 1.15,
+                        ifelse(sector == "Bivalve mariculture", meat_yr * 6, mt_yr)),
+         mmt_yr = mt_yr / 1e6,
+         food_yr = food_yr / 1e6) %>%
+  group_by(scenario, demand) 
+
+tot_harvest <- final_indiv_df_mt %>%
+  filter(sector != "Inland fisheries") %>%
+  group_by(scenario, demand) %>%
+  mutate(total_h = sum(mmt_yr),
+         tot_marine_meat = sum(meat_yr_mmt)) %>%
+  ungroup()
+
+
+###
+
 
 final_indiv_df2 <- final_indiv_df %>%
   mutate(demand_scen = ifelse(demand == "current", "Current",
-                              ifelse(demand == "extreme", "Extreme", "Future")))
+                              ifelse(demand == "extreme", "Extreme", "Future")),
+         sector_lab = ifelse(sector == "Marine wild fisheries", paste0("a ", sector),
+                             ifelse(sector == "Bivalve mariculture", paste0("c ", sector), paste0("b ", sector))))
+
 
 final_indiv_df2$sector <- factor(final_indiv_df2$sector, levels = c("Marine wild fisheries", "Finfish mariculture", "Bivalve mariculture", "Inland fisheries"))
 
@@ -184,13 +223,13 @@ final_indiv_df2$sector <- factor(final_indiv_df2$sector, levels = c("Marine wild
 ## --------------------------------------
 
 
-fingers_crossed3 <- ggplot(indiv_supply2 %>% filter(aq_scen == "Scenario 4c - tech advance",
-                                                    sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price)) +
-  geom_path(alpha = 0.9, color = "black", size = 1) +
-  geom_line(data = indiv_demand2 %>% filter(sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price, group = demand_scen, color = demand_scen), size = 1.5, alpha = 0.8) +
-  facet_wrap(~sector, scales = "free") + 
-  geom_point(data = init_prod_pts, aes(x = quantity / 1e6, y = price), color = "black", size = 2) +
-  geom_point(data = final_indiv_df2 %>% filter(sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price, color = demand_scen), shape = 4, size = 6) +
+fig4 <- ggplot(indiv_supply2 %>% filter(aq_scen == "Scenario 4c - tech advance",
+                                                    sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price, size = curve_type)) +
+  geom_path(alpha = 0.9, color = "black") +
+  geom_line(data = indiv_demand2 %>% filter(sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price, group = demand_scen, color = demand_scen), size = 0.6, alpha = 0.8) +
+  facet_wrap(~sector_lab, scales = "free") + 
+  geom_point(data = init_prod_pts, aes(x = quantity / 1e6, y = price), color = "black", size = 1) +
+  geom_point(data = final_indiv_df2 %>% filter(sector != "Inland fisheries"), aes(x = meat_yr / 1e6, y = price, color = demand_scen), shape = 4, size = 2) +
   xlab("Edible production (mmt)") +
   ylab("Price (USD per mt)") +
   # scale_color_manual(values = c("#00798c", "#edae49", "#d1495b")) +
@@ -199,7 +238,7 @@ fingers_crossed3 <- ggplot(indiv_supply2 %>% filter(aq_scen == "Scenario 4c - te
                      values = c("#009966", "#3333CC", "#ff3366")) +
   scale_size_manual(name = "",
                     breaks = c("Supply"),
-                    values = c(1.5),
+                    values = c(0.6),
                     labels = c("Supply curves")) +
   scale_y_continuous(label=comma) +
   guides(colour = guide_legend(override.aes=list(shape=NA))) +
@@ -208,17 +247,20 @@ fingers_crossed3 <- ggplot(indiv_supply2 %>% filter(aq_scen == "Scenario 4c - te
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18),
-        title = element_text(size = 14),
-        legend.title = element_text(size = 16),
-        legend.position = "top",
-        legend.text = element_text(size = 15),
-        strip.text = element_text(size = 16),
+        axis.text = element_text(size = 7),
+        axis.title = element_text(size = 7),
+        title = element_text(size = 7),
+        legend.title = element_text(size = 7),
+        legend.position = "bottom",
+        legend.text = element_text(size = 7),
         legend.box = "vertical",
-        plot.margin = margin(10, 30, 10, 10))
+        plot.margin = margin(10, 30, 10, 10),
+        strip.text = element_text(size = 8, hjust = 0),
+        strip.background = element_rect(color = "white", fill = "white"),
+        legend.spacing.y = unit(-2, "mm"))
 
 ## note to user: change path, save fig 4 in main text
-ggsave(filename = "fig4.png", fingers_crossed3, width = 10, height = 5, units = "in", dpi = 300)
+ggsave(filename = "fig4.pdf", fig4, width = 136, height = 70, units = "mm", dpi = 600)
+
 
 
