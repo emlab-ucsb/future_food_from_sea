@@ -26,32 +26,32 @@ All external data can be downloaded from the study’s Dryad repository. You may
 This script creates a table that we use to match each fishery with a conversion factor that allows for converting between live weight and edible animal protein. Conversions are based on those published in Edwards et al. 2019. We use this table to convert species-level historical landings as reported by the FAO as well as our projected harvests into edible food equivalents. 
 
 Input files: 
-- `TS_FI_PRODUCTION.csv`
-- `CL_FI_PRODUCTION_SOURCE.csv`
-- `CL_FI_SPECIES_GROUPS.csv` 
-- `ProjectionData.csv`
+- `TS_FI_PRODUCTION.csv`- global fishery production (historic, 1950-2017)
+- `CL_FI_PRODUCTION_SOURCE.csv` - descriptions and labels for “SOURCE” codes used in `TS_FI_PRODUCTION.csv`
+- `CL_FI_SPECIES_GROUPS.csv` - descriptions and labels for “SPECIES” codes used in `TS_FI_PRODUCTION.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 
 Output file:
-- `isscaap_food_conv_all.csv`
+- `isscaap_food_conv_all.csv` - table to convert harvest to food equivalents
 
 **`historic_prod.R`**
 
 This script examines historical production from FAO data and organizes data for calculating initial production values. We filter the FAO historic production data for species harvested in marine environments. We also filter out plants and species that are not generally consumed as food (e.g., natural sponges, turtles, whales). Then we use the `isscaap_food_conv_all.csv` file produced above to match conversion values with production, matching by ISSCAAP category. This script creates Fig. 1.
 
 Input files: 
-- `ProjectionData.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 - `isscaap_food_conv_all.csv` (produced in `edible_conv.R`)
-- `TS_FI_PRODUCTION.csv`
-- `CL_FI_PRODUCTION_SOURCE.csv`
-- `CL_FI_SPECIES_GROUPS.csv`
-- `CL_FI_WATERAREA_GROUPS.csv`
-- `CL_FI_COUNTRY_GROUPS.csv`
+- `TS_FI_PRODUCTION.csv` - global fishery production (historic, 1950-2017)
+- `CL_FI_PRODUCTION_SOURCE.csv` - descriptions and labels for “SOURCE” codes used in `TS_FI_PRODUCTION.csv`
+- `CL_FI_SPECIES_GROUPS.csv` - descriptions and labels for “SPECIES” codes used in `TS_FI_PRODUCTION.csv`
+- `CL_FI_WATERAREA_GROUPS.csv` - descriptions and labels for “AREA” codes used in `TS_FI_PRODUCTION.csv`
+- `CL_FI_COUNTRY_GROUPS.csv` - descriptions and labels for “COUNTRY” codes used in `TS_FI_PRODUCTION.csv`
 
 Output files:
-- `historical_prod_x_sp.csv`
-- `land_based_production.csv`
-- `historical_prod.csv`
-- `init_mari_prod.csv`
+- `historical_prod_x_sp.csv` - historic production by species, with food equivalents
+- `land_based_production.csv`- historic land-based production, with food equivalents
+- `historical_prod.csv` - historic production, summarised by species group
+- `init_mari_prod.csv` - initial mariculture production
 - Fig. 1: (object is called `hist_food_fig2`)
 
 ## Prep inland fishery information (folder: `inland_supply_code_data`)
@@ -68,7 +68,7 @@ Input file:
 - `land_based_production.csv` (from `historic_prod.R`)
 - `Inland_supply_info.csv` (produced partially from `land_based_production.csv`)
 
-Output files:
+Output files (all files contain projections for future land-based fisheries production):
 - `inland_supply_dat.csv`
 - `inland_supply_dat_low_elast.csv`
 - `inland_supply_dat_high_elast.csv`
@@ -85,18 +85,18 @@ Output files:
 This script computes the current status for different food sectors and calculates other relevant indicators used throughout the text. The first part compares the most recent landings (and food equivalent quantities) from Costello et al. 2016 to the most recent values from the FAO. This information is used to scale projected harvests from the Costello et al. fisheries to represent global landings. Next we calculate initial marine capture fishery production, followed by initial mariculture production (broken down by fed and unfed), initial inland fishery production (broken down by capture and aquaculture), and initial meat production -- all calculated in terms of live weight and edible equivalents. Next we determine initial price values for the relevant categories in our study. Finally, we create data files with relevant initial condition information that will be used throughout the analyses.
 
 Input files: 
-- `ProjectionData.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 - `isscaap_food_conv_all.csv` (produced in `edible_conv.R`)
 - `historical_prod.csv` (produced in `historical_prod.R`)
 - `historical_prod_x_sp.csv` (produced in `historical_prod.R`)
 - `inland_supply_info.csv` (produced in python scripts) 
-- `FAOSTAT_data_3-10-2020.csv`
+- `FAOSTAT_data_3-10-2020.csv` - FAOSTAT food balance sheets data (world)
 - `init_mari_prod.csv` (produced in `historical_prod.R`)
 
 Output files:
-- `upside_fao_scale_df.csv`
-- `init_pq_df.csv`
-- `init_pq_dfh.csv`
+- `upside_fao_scale_df.csv` - table with values used to scale harvest outputs
+- `init_pq_df.csv` - initial conditions, price and quantity (food)
+- `init_pq_dfh.csv` - initital conditoins, price and quantity (harvest)
 
 ## Marine capture fisheries analysis (folder: `capture_fisheries`)
 
@@ -105,38 +105,38 @@ Output files:
 This script runs the marine capture fisheries projection model, which projects future harvest, cost, revenue, and biomass over time under two management scenarios: FMSY, the fishing pressure that eventually leads to maximum sustainable yield, and F current, the current fishing pressure as parameterized by the global fishery database (Costello et al. 2016). It also determines steady-state harvest (the harvest that eventually will happen each year) for each fishery under the two harvest policies. We combine these outputs with management cost information. This script calls functions in the `capture_functions` folder.
 
 Input files: 
-- `ProjectionData.csv`
-- `Outputs_rec_method_2018.csv`
-- `Outputs_mean_method_2018.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
+- `Outputs_rec_method_2018.csv` - management cost data by country
+- `Outputs_mean_method_2018.csv`- management cost data by country
 
 Output files:
-- `projection_outputs.rds`
-- `ss_outputs_scenarios.csv`
+- `projection_outputs.rds` - fishery projection outputs
+- `ss_outputs_scenarios.csv` - fishery steady-state outputs
 
 **`capture_sc_run.R`**
 
 This script uses the results from `capture_run.R` to create marine capture fishery supply curves, or production at a range of different prices. Production only occurs if it is profitable, and the fishery management policy (FMSY or F current) that results in the greatest steady-state profits is the option chosen, given a certain price. We include a number of sensitivity analyses and calculate associated supply curves.
 
 Input files: 
-- `ProjectionData.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 - `projection_outputs.rds` (from `capture_run.R`)
 - `ss_outputs_scenarios.csv` (from `capture_run.R`)
 - `isscaap_food_conv_all.csv` (from `edible_conv.R`)
 - `upside_fao_scale_df.csv` (from `init_conditions.R`)
 
 Output files:
-- `production_df.rds`
-- `production_df_smry.rds`
-- `production_df_s1.rds`
-- `production_s1_smry.rds`
-- `production_df_s2.rds`
-- `production_s2_smry.rds`
-- `production_df_s3.rds`
-- `production_s3_smry.rds`
-- `fmsy_prod_df.rds`
-- `fmsy_prod_smry.rds`
-- `f0_prod_df.rds`
-- `f0_prod_smry.rds`
+- `production_df.rds` - fishery-level supply curve outputs
+- `production_df_smry.rds` - fishery-level supply curve outputs (summarized by price)
+- `production_df_s1.rds` - fishery-level supply curve outputs (sensitivity analysis 1)
+- `production_s1_smry.rds`- fishery-level supply curve outputs (sensitivity analysis 1, summarized by price)
+- `production_df_s2.rds` - fishery-level supply curve outputs (sensitivity analysis 2)
+- `production_s2_smry.rds` - fishery-level supply curve outputs (sensitivity analysis 2, summarized by price)
+- `production_df_s3.rds` - fishery-level supply curve outputs (sensitivity analysis 3)
+- `production_s3_smry.rds` - fishery-level supply curve outputs (sensitivity analysis 3, summarized by price)
+- `fmsy_prod_df.rds` - fishery-level supply curve outputs for FMSY
+- `fmsy_prod_smry.rds` - fishery-level supply curve outputs for FMSY (summarized by price)
+- `f0_prod_df.rds` - fishery-level supply curve outputs for F0
+- `f0_prod_smry.rds` - fishery-level supply curve outputs for F0 (summarized by price)
 
 **`sc_outputs.R`**
 
@@ -146,7 +146,7 @@ Script:
 - `sc_outputs.R` (folder = `capture_fisheries`)
 
 Input files: 
-- `ProjectionData.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 - `isscaap_food_conv_all.csv` (from `edible_conv.R`)
 - `upside_fao_scale_df.csv` (from `init_conditions.R`)
 - `production_df_smry.rds` (from `capture_sc_run.R`)
@@ -156,7 +156,7 @@ Input files:
 - `fmsy_prod_smry.rds` (from `capture_sc_run.R`)
 
 Output file:
-- `harvest_x_price_x_conversion.csv`
+- `harvest_x_price_x_conversion.csv` - marine capture fishery supply curve outputs combined
 
 ## Mariculture analysis (folder: `aquaculture`)
 
@@ -338,8 +338,8 @@ Input files:
 - `inland_supply_dat_high growth_harvest.csv` (from python scripts)
 
 Output files:
-- `all_supply_curves.rds`
-- `subset_supply_curves.rds`
+- `all_supply_curves.rds` - all supply curves combined
+- `subset_supply_curves.rds` - subset of all supply curves combined (for main text analysis)
 
 ## Create demand curves (folder: `demand`)
 
@@ -349,10 +349,10 @@ This script creates demand curves for the three marine food sectors (marine capt
 
 Input files:
 - `init_pq_df.csv` (from `init_conditions.R`)
-- `cai_2017.pdf` (in repo)
+- `cai_2017.pdf` (in repo, report containing parameters)
 
 Output files:
-- `demand_curves_final.rds`
+- `demand_curves_final.rds` - demand curves outputs
 
 ## Perform analyses with all outputs (folder: `analysis`)
 
@@ -371,7 +371,7 @@ Input files:
 - `subset_supply_curves.rds` (from `all_supply_curves.R`)
 - `init_pq_df.csv` (from `init_conditions.R`)
 - `init_pq_dfh.csv` (from `init_conditions.R`)
-- `ProjectionData.csv`
+- `ProjectionData.csv` - fishery-level data (e.g., parameters)
 - `Projection_outputs.rds` (from `capture_run.R`)
 - `isscaap_food_conv_all.csv` (from `edible_conv.R`)
 - `upside_fao_scale_df.csv` (from `init_conditions.R`)
@@ -391,7 +391,7 @@ Input files:
 - `demand_curves_final.rds` (from `demand_cruves.R`)
 
 Output files:
-- `sector_sp_prod_final.csv`
+- `sector_sp_prod_final.csv` - intersection points
 - `fig4.png`
 
 **`donut_fig.R`**
@@ -420,8 +420,8 @@ Input files:
 Output files:
 - `si_1_updated.png`
 - `si_donut.png`
-- `Si_prod_all_sources.csv`
-- `si_prod_all_sources_harvest.csv`
+- `Si_prod_all_sources.csv` - intersection points
+- `si_prod_all_sources_harvest.csv` - intersection points
 
 **`find_intersection.R`**
 
@@ -432,12 +432,12 @@ Input files:
 - `demand_curves_final.rds` (from `demand_cruves.R`)
 
 Output files:
-- `id_df.rds`
-- `bivalve_intersects.rds`
-- `ff_intersects.rds`
-- `inland_intersects.rds`
-- `capture_intersects.rds`
-- `ps_all_intersects.rds`
+- `id_df.rds` - table of ids
+- `bivalve_intersects.rds` - intersection points
+- `ff_intersects.rds` - intersection points
+- `inland_intersects.rds` - intersection points
+- `capture_intersects.rds` - intersection points
+- `ps_all_intersects.rds` - intersection points
 
 **`sensitivity_analysis.R`**
 
@@ -447,14 +447,14 @@ Input files:
 - `id_df.rds` (from `find_intersection.R`)
 - `demand_curves_final.rds` (from `demand_cruves.R`)
 - `all_supply_curves.rds` (from `all_supply_curves.R`)
-- `bivalve_intersects.rds`
-- `ff_intersects.rds`
-- `inland_intersects.rds`
-- `capture_intersects.rds`
-- `ps_all_intersects.rds`
+- `bivalve_intersects.rds` (from `find_intersection.R`)
+- `ff_intersects.rds` (from `find_intersection.R`)
+- `inland_intersects.rds` (from `find_intersection.R`)
+- `capture_intersects.rds` (from `find_intersection.R`)
+- `ps_all_intersects.rds` (from `find_intersection.R`)
 
 Output file:
-- `all_si_outputs.csv`
+- `all_si_outputs.csv` - outputs for SI
 
 **`sensitivity_Fig.R`**
 
