@@ -186,7 +186,8 @@ Input files:
 - `Bivalve_layers.tif` (from `Step1_format_gentry_data.R`)
 - `Farm_layers.tif` (from `Step1_format_gentry_data.R`)
 - `Farm_eez.tif` (from `Step1_format_gentry_data.R`)
-- `regionData.csv` (from `Step1_format_gentry_data.R`)
+- `regionData.csv` -- data frame with EEZ and other jurisdictional attributes for each ocean cell included in the analysis
+
 
 Output file:
 - `Aqua_production_results.csv` - contains the finfish and bivalves production potential of each cell of ocean as well as the component costs for producing that potential
